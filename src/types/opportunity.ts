@@ -67,4 +67,6 @@ export interface CommercialOpportunity {
   commercialStatus: CommercialStatus;
   estimatedContractValueUSD?: number;
   scoring: ScoreBreakdown;
+  clientNote?: string;        // Nota del cliente (espacio de trabajo)
+  statusUpdatedAt?: string;   // Último cambio de estado hecho por el cliente
 }

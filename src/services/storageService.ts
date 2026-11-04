@@ -4,6 +4,7 @@ import { CommercialOpportunity, ScoringWeights } from '../types/opportunity';
 import { DashboardConfig } from '../types/dashboard';
 import { defaultDashboards } from '../data/defaultDashboards';
 import { DEFAULT_WEIGHTS } from './scoringService';
+import { workspaceService } from './workspaceService';
 
 const STORAGE_KEYS = {
   PROJECTS: 'radar_minero_projects_v2',
@@ -69,6 +70,7 @@ export const storageService = {
 
   saveDashboards(dashboards: DashboardConfig[]): void {
     localStorage.setItem(STORAGE_KEYS.DASHBOARDS, JSON.stringify(dashboards));
+    workspaceService.queueSave({ dashboards });
   },
 
   getActiveDashboardId(): string {
@@ -78,6 +80,7 @@ export const storageService = {
 
   setActiveDashboardId(id: string): void {
     localStorage.setItem(STORAGE_KEYS.ACTIVE_DASHBOARD_ID, id);
+    workspaceService.queueSave({ activeDashboardId: id });
   },
 
   getScoringWeights(): ScoringWeights {
@@ -95,6 +98,7 @@ export const storageService = {
 
   saveScoringWeights(weights: ScoringWeights): void {
     localStorage.setItem(STORAGE_KEYS.SCORING_WEIGHTS, JSON.stringify(weights));
+    workspaceService.queueSave({ scoringWeights: weights });
   },
 
   resetAllToDefaults(): void {
@@ -105,6 +109,11 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEYS.DASHBOARDS, JSON.stringify(defaultDashboards));
     localStorage.setItem(STORAGE_KEYS.ACTIVE_DASHBOARD_ID, defaultDashboards[0].id);
     localStorage.setItem(STORAGE_KEYS.SCORING_WEIGHTS, JSON.stringify(DEFAULT_WEIGHTS));
+    workspaceService.queueSave({
+      dashboards: defaultDashboards,
+      activeDashboardId: defaultDashboards[0].id,
+      scoringWeights: DEFAULT_WEIGHTS,
+    });
   },
 
   /**

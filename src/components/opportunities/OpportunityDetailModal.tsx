@@ -1,5 +1,5 @@
-import React from 'react';
-import { CommercialOpportunity } from '../../types/opportunity';
+import React, { useState, useEffect } from 'react';
+import { CommercialOpportunity, CommercialStatus } from '../../types/opportunity';
 import { Badge } from '../common/Badge';
 import {
   X,
@@ -20,14 +20,32 @@ interface OpportunityDetailModalProps {
   onClose: () => void;
   onOpenProject?: (projectId: string) => void;
   onOpenScoringConfig?: () => void;
+  onUpdate?: (id: string, patch: { status?: CommercialStatus; note?: string }) => void;
 }
+
+const STATUSES: CommercialStatus[] = [
+  'Identificada Tempranamente',
+  'En Análisis Comercial',
+  'Mapeo de Decisores',
+  'Contacto Inicial / Warm Intro',
+  'Precalificación Abierta',
+  'RFI / RFQ en Proceso',
+  'Ganada',
+  'Descartada / Archivada',
+];
 
 export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   opportunity,
   onClose,
   onOpenProject,
   onOpenScoringConfig,
+  onUpdate,
 }) => {
+  const [note, setNote] = useState('');
+  useEffect(() => {
+    setNote(opportunity?.clientNote || '');
+  }, [opportunity?.id, opportunity?.clientNote]);
+
   if (!opportunity) return null;
 
   const priorityColors = {
@@ -90,6 +108,47 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
         {/* Body */}
         <div className="p-6 overflow-y-auto space-y-6">
+          {/* Seguimiento comercial del cliente */}
+          {onUpdate && (
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                Seguimiento comercial
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <label className="text-[11px] text-slate-400 space-y-1 block">
+                  <span>Etapa en tu pipeline</span>
+                  <select
+                    value={opportunity.commercialStatus}
+                    onChange={(e) => onUpdate(opportunity.id, { status: e.target.value as CommercialStatus })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-100"
+                  >
+                    {STATUSES.map((st) => (
+                      <option key={st} value={st}>{st}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-400 space-y-1 block">
+                  <span>Nota privada (solo tu equipo)</span>
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    onBlur={() => {
+                      if (note !== (opportunity.clientNote || '')) onUpdate(opportunity.id, { note });
+                    }}
+                    rows={2}
+                    placeholder="Ej: reunión agendada con el gerente de proyectos"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-100 resize-none"
+                  />
+                </label>
+              </div>
+              {opportunity.statusUpdatedAt && (
+                <p className="text-[10px] text-slate-500">
+                  Última actualización: {new Date(opportunity.statusUpdatedAt).toLocaleString('es-CL')}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Próxima Acción Comercial Recomendada (Call to action prioritario) */}
           <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/40 to-slate-900 border border-emerald-500/40 flex items-start gap-3 shadow-lg">
             <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mt-0.5">
@@ -108,7 +167,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                 </span>
                 <span>·</span>
                 <span>
-                  Valor Estimado Contrato: <strong className="text-emerald-400 font-mono">US$ {(opportunity.estimatedContractValueUSD || 0) / 1000000}M</strong>
+                  Valor Estimado Contrato: <strong className="text-emerald-400 font-mono">{opportunity.estimatedContractValueUSD ? `US$ ${opportunity.estimatedContractValueUSD / 1000000}M` : 'No estimado'}</strong>
                 </span>
               </div>
             </div>

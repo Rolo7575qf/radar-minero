@@ -125,7 +125,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Reset / Restore Demo Button */}
           <button
             onClick={onResetData}
-            title="Restaurar datos y configuraciones iniciales"
+            title="Restaurar dashboards y ponderaciones por defecto"
             className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition"
           >
             <RefreshCw className="w-3.5 h-3.5" />

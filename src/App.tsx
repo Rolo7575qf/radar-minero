@@ -18,13 +18,35 @@ import { ScoringConfigModal } from './components/opportunities/ScoringConfigModa
 import { MiningProject } from './types/project';
 import { EarlySignal } from './types/signal';
 import { MiningCompany } from './types/company';
-import { CommercialOpportunity, ScoringWeights } from './types/opportunity';
+import { CommercialOpportunity, CommercialStatus, ScoringWeights } from './types/opportunity';
 import { DashboardConfig } from './types/dashboard';
 
 import { storageService } from './services/storageService';
 import { buildEcosystem } from './services/ecosystemBuilder';
+import { workspaceService, OppOverride } from './services/workspaceService';
 import { signalEngine, IngestSignalPayload } from './services/signalEngine';
 import { calculateOpportunityScore, getPriorityFromScore } from './services/scoringService';
+
+// Recalcula puntaje y prioridad de todas las oportunidades con unas ponderaciones dadas.
+const recalcOpportunities = (
+  opps: CommercialOpportunity[],
+  projs: MiningProject[],
+  sigs: EarlySignal[],
+  weights: ScoringWeights
+): CommercialOpportunity[] =>
+  opps.map((opp) => {
+    const proj = projs.find((p) => p.id === opp.relatedProjectId) || {};
+    const projSignals = sigs.filter((sg) => sg.relatedProjectId === opp.relatedProjectId);
+    const newScore = calculateOpportunityScore(
+      proj,
+      projSignals,
+      opp.involvedCompanies.length,
+      opp.keyDecisionMakers.length,
+      opp.anticipationWindowMonths,
+      weights
+    );
+    return { ...opp, scoring: newScore, priority: getPriorityFromScore(newScore.totalScore) };
+  });
 
 export const App: React.FC = () => {
   // Navigation & Filtering State
@@ -35,7 +57,18 @@ export const App: React.FC = () => {
   // Core Data State
   const [projects, setProjects] = useState<MiningProject[]>([]);
   const [signals, setSignals] = useState<EarlySignal[]>([]);
-  const [opportunities, setOpportunities] = useState<CommercialOpportunity[]>([]);
+  const [rawOpportunities, setOpportunities] = useState<CommercialOpportunity[]>([]);
+  const [oppOverrides, setOppOverrides] = useState<Record<string, OppOverride>>({});
+  const opportunities = useMemo(
+    () =>
+      rawOpportunities.map((o) => {
+        const ov = oppOverrides[o.id];
+        return ov
+          ? { ...o, commercialStatus: ov.status ?? o.commercialStatus, clientNote: ov.note, statusUpdatedAt: ov.updatedAt }
+          : o;
+      }),
+    [rawOpportunities, oppOverrides]
+  );
   const sources = useMemo(() => [...new Set(signals.map((sg) => sg.originalSource).filter(Boolean))], [signals]);
   const lastSignalDate = useMemo(() => {
     const dates = signals.map((sg) => sg.publishedDate).filter(Boolean).sort();
@@ -69,13 +102,37 @@ export const App: React.FC = () => {
     setScoringWeights(storageService.getScoringWeights());
 
     // Sincronización en segundo plano con Cloudflare D1 (si está desplegado en Cloudflare)
-    storageService.syncWithCloudflareD1().then((synced) => {
+    (async () => {
+      const synced = await storageService.syncWithCloudflareD1();
+      let projs = storageService.getProjects();
+      let sigs = storageService.getSignals();
+      let opps = storageService.getOpportunities();
       if (synced) {
-        if (synced.projects) setProjects(synced.projects);
-        if (synced.signals) setSignals(synced.signals);
-        if (synced.opportunities) setOpportunities(synced.opportunities);
+        if (synced.projects) { projs = synced.projects; setProjects(projs); }
+        if (synced.signals) { sigs = synced.signals; setSignals(sigs); }
+        if (synced.opportunities) { opps = synced.opportunities; }
       }
-    });
+
+      // Espacio de trabajo del usuario (pipeline, ponderaciones, dashboards) desde D1
+      const ws = await workspaceService.load();
+      if (ws) {
+        if (ws.oppOverrides) setOppOverrides(ws.oppOverrides);
+        if (ws.dashboards && ws.dashboards.length) {
+          storageService.saveDashboards(ws.dashboards);
+          setDashboards(ws.dashboards);
+        }
+        if (ws.activeDashboardId) {
+          storageService.setActiveDashboardId(ws.activeDashboardId);
+          setActiveDashboardId(ws.activeDashboardId);
+        }
+        if (ws.scoringWeights) {
+          storageService.saveScoringWeights(ws.scoringWeights);
+          setScoringWeights(ws.scoringWeights);
+          opps = recalcOpportunities(opps, projs, sigs, ws.scoringWeights);
+        }
+      }
+      setOpportunities(opps);
+    })();
   }, []);
 
   // Filter projects/signals by global search or country
@@ -224,29 +281,25 @@ export const App: React.FC = () => {
     storageService.saveScoringWeights(newWeights);
 
     // Recalculate scoring for all opportunities
-    const recalculated = opportunities.map((opp) => {
-      const proj = projects.find((p) => p.id === opp.relatedProjectId) || {};
-      const projSignals = signals.filter((s) => s.relatedProjectId === opp.relatedProjectId);
-
-      const newScore = calculateOpportunityScore(
-        proj,
-        projSignals,
-        opp.involvedCompanies.length,
-        opp.keyDecisionMakers.length,
-        opp.anticipationWindowMonths,
-        newWeights
-      );
-
-      return {
-        ...opp,
-        scoring: newScore,
-        priority: getPriorityFromScore(newScore.totalScore),
-      };
-    });
+    const recalculated = recalcOpportunities(rawOpportunities, projects, signals, newWeights);
 
     setOpportunities(recalculated);
     storageService.saveOpportunities(recalculated);
   };
+
+  // Cambio de etapa / nota de una oportunidad (se guarda por usuario en D1)
+  const handleUpdateOpportunity = (id: string, patch: { status?: CommercialStatus; note?: string }) => {
+    const next = {
+      ...oppOverrides,
+      [id]: { ...oppOverrides[id], ...patch, updatedAt: new Date().toISOString() },
+    };
+    setOppOverrides(next);
+    workspaceService.queueSave({ oppOverrides: next });
+  };
+
+  const selectedOpportunityView = selectedOpportunity
+    ? opportunities.find((o) => o.id === selectedOpportunity.id) || selectedOpportunity
+    : null;
 
   const currentDashboard =
     dashboards.find((d) => d.id === activeDashboardId) || dashboards[0];
@@ -499,7 +552,8 @@ export const App: React.FC = () => {
 
       {selectedOpportunity && (
         <OpportunityDetailModal
-          opportunity={selectedOpportunity}
+          opportunity={selectedOpportunityView}
+          onUpdate={handleUpdateOpportunity}
           onClose={() => setSelectedOpportunity(null)}
           onOpenProject={(pId) => {
             const p = projects.find((item) => item.id === pId);

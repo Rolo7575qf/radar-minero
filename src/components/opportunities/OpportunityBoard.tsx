@@ -37,6 +37,25 @@ export const OpportunityBoard: React.FC<OpportunityBoardProps> = ({
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPriority, setSelectedPriority] = useState<string>('Todas');
+  const [groupBy, setGroupBy] = useState<'priority' | 'stage'>('priority');
+
+  const STAGES = [
+    'Identificada Tempranamente',
+    'En Análisis Comercial',
+    'Mapeo de Decisores',
+    'Contacto Inicial / Warm Intro',
+    'Precalificación Abierta',
+    'RFI / RFQ en Proceso',
+    'Ganada',
+    'Descartada / Archivada',
+  ];
+
+  const colHeaders = {
+    'Máxima': { title: 'Prioridad Máxima', color: 'border-emerald-500/40 text-emerald-300' },
+    'Alta': { title: 'Prioridad Alta', color: 'border-amber-500/40 text-amber-300' },
+    'Media': { title: 'Prioridad Media', color: 'border-cyan-500/40 text-cyan-300' },
+    'Baja-media': { title: 'Baja-Media', color: 'border-slate-700 text-slate-400' },
+  };
 
   const PRIORITIES: (OpportunityPriority | 'Todas')[] = [
     'Todas',
@@ -157,26 +176,46 @@ export const OpportunityBoard: React.FC<OpportunityBoardProps> = ({
 
       {/* View: KANBAN BOARD */}
       {viewMode === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
-          {priorityColumns.map((colPriority) => {
-            const oppsInCol = filteredOpportunities.filter((o) => o.priority === colPriority);
+        <div className="flex items-center gap-2 text-xs">
+          <span className="font-semibold text-slate-400">Agrupar por:</span>
+          {(['priority', 'stage'] as const).map((g) => (
+            <button
+              key={g}
+              onClick={() => setGroupBy(g)}
+              className={`px-3 py-1.5 rounded-lg font-semibold border transition ${
+                groupBy === g
+                  ? 'bg-slate-800 text-amber-300 border-slate-700'
+                  : 'text-slate-400 border-slate-800 hover:text-white'
+              }`}
+            >
+              {g === 'priority' ? 'Prioridad' : 'Etapa del pipeline'}
+            </button>
+          ))}
+        </div>
+      )}
 
-            const colHeaders = {
-              'Máxima': { title: 'Prioridad Máxima', color: 'border-emerald-500/40 text-emerald-300' },
-              'Alta': { title: 'Prioridad Alta', color: 'border-amber-500/40 text-amber-300' },
-              'Media': { title: 'Prioridad Media', color: 'border-cyan-500/40 text-cyan-300' },
-              'Baja-media': { title: 'Baja-Media', color: 'border-slate-700 text-slate-400' },
-            };
+      {viewMode === 'kanban' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+          {(groupBy === 'priority' ? (priorityColumns as string[]) : STAGES).map((colKey) => {
+            const colPriority = colKey as keyof typeof colHeaders;
+            const oppsInCol = filteredOpportunities.filter((o) =>
+              groupBy === 'priority' ? o.priority === colKey : o.commercialStatus === colKey
+            );
+
+            const header =
+              groupBy === 'priority'
+                ? colHeaders[colPriority]
+                : { title: colKey, color: 'border-slate-700 text-slate-300' };
 
             return (
               <div
-                key={colPriority}
+                key={colKey}
                 className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 flex flex-col space-y-3"
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                  <span className={`text-xs font-bold uppercase tracking-wider ${colHeaders[colPriority].color}`}>
-                    {colHeaders[colPriority].title}
+                  <span className={`text-xs font-bold uppercase tracking-wider ${header.color}`}>
+                    {header.title}
                   </span>
                   <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-slate-900 text-slate-300 border border-slate-800">
                     {oppsInCol.length}
