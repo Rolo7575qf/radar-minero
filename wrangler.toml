@@ -1,17 +1,18 @@
 # ==============================================================================
-# RADAR MINERO — CONFIGURACIÓN DE CLOUDFLARE (PAGES & D1)
+# RADAR MINERO — CONFIGURACIÓN DE CLOUDFLARE WORKER & STATIC ASSETS
 # ==============================================================================
 
 name = "radar-minero"
+main = "worker.js"
 compatibility_date = "2024-11-01"
-pages_build_output_dir = "dist"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
 
 # Vinculación de Base de Datos Cloudflare D1
 [[d1_databases]]
 binding = "DB"
 database_name = "radar-minero-db"
-database_id = "radar-minero-d1-id" # Se actualiza tras crear la base de datos en Cloudflare
-
-# Configuración de Cron Triggers Semanales (Lunes 06:00 AM UTC)
-[triggers]
-crons = ["0 6 * * 1"]
+database_id = "9c04a732-a945-4706-b392-b19843cd3148"
