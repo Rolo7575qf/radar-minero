@@ -4,8 +4,18 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/weekly-signals",
+      "schedule": "0 6 * * 1"
     }
   ],
   "headers": [
