@@ -16,3 +16,10 @@ not_found_handling = "single-page-application"
 binding = "DB"
 database_name = "radar-minero-db"
 database_id = "9c04a732-a945-4706-b392-b19843cd3148"
+
+# Cloudflare Access (Zero Trust). REQUIRE_AUTH = "0" -> API abierta (solo verifica identidad si existe).
+# Cambiar a "1" cuando se confirme que /api/workspace muestra tu correo.
+[vars]
+ACCESS_TEAM_DOMAIN = "weathered-pine-5574.cloudflareaccess.com"
+ACCESS_AUD = "84b91b2630484e86910ac6e516ac1635848a2c9d0328de1e5777896ce7777c6f"
+REQUIRE_AUTH = "0"

@@ -89,12 +89,95 @@ const mapHistory = (h) => ({
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "https://radar.inteligenciaconectada.com" },
   });
+
+
+// ---------- Autenticación (Cloudflare Access) ----------
+// Se activa con la variable REQUIRE_AUTH="1". Requiere ACCESS_TEAM_DOMAIN (ej: "miequipo.cloudflareaccess.com")
+// y ACCESS_AUD (Application Audience tag de la app de Access). Si REQUIRE_AUTH no está activa, no cambia nada.
+const b64urlToBytes = (str) => {
+  str = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (str.length % 4) str += "=";
+  const bin = atob(str);
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+};
+
+let jwksCache = { at: 0, keys: null };
+async function getJwks(env) {
+  if (jwksCache.keys && Date.now() - jwksCache.at < 3600_000) return jwksCache.keys;
+  const res = await fetch("https://" + env.ACCESS_TEAM_DOMAIN + "/cdn-cgi/access/certs");
+  if (!res.ok) throw new Error("jwks");
+  const { keys } = await res.json();
+  jwksCache = { at: Date.now(), keys };
+  return keys;
+}
+
+// Devuelve el email verificado del usuario, o null si no hay sesión válida.
+async function verifiedUser(request, env) {
+  try {
+    const token = request.headers.get("Cf-Access-Jwt-Assertion");
+    if (!token || !env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD) return null;
+    const [h, p, sig] = token.split(".");
+    if (!h || !p || !sig) return null;
+    const header = JSON.parse(new TextDecoder().decode(b64urlToBytes(h)));
+    const payload = JSON.parse(new TextDecoder().decode(b64urlToBytes(p)));
+    const jwk = (await getJwks(env)).find((k) => k.kid === header.kid);
+    if (!jwk || header.alg !== "RS256") return null;
+    const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+    const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64urlToBytes(sig), new TextEncoder().encode(h + "." + p));
+    if (!ok) return null;
+    const aud = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+    if (!aud.includes(env.ACCESS_AUD)) return null;
+    if (payload.iss !== "https://" + env.ACCESS_TEAM_DOMAIN) return null;
+    if (!payload.exp || payload.exp * 1000 < Date.now()) return null;
+    return payload.email || null;
+  } catch {
+    return null;
+  }
+}
 
 var worker_default = {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+
+    // --- Salud (público) ---
+    if (url.pathname === "/api/health") {
+      return json({ ok: true, auth: env.REQUIRE_AUTH === "1" });
+    }
+
+    // --- Control de acceso a toda la API ---
+    let userEmail = null;
+    if (url.pathname.startsWith("/api/")) {
+      userEmail = await verifiedUser(request, env);
+      if (env.REQUIRE_AUTH === "1" && !userEmail) {
+        return json({ error: "No autorizado" }, 401);
+      }
+    }
+
+    // --- Espacio de trabajo por usuario (pipeline, pesos, dashboards) ---
+    if (url.pathname === "/api/workspace") {
+      if (!userEmail) return json({ error: "No autorizado" }, 401);
+      try {
+        if (request.method === "GET") {
+          const row = await env.DB.prepare("SELECT state, updated_at FROM workspaces WHERE email = ?").bind(userEmail).first();
+          return json({ email: userEmail, state: j(row && row.state, {}), updatedAt: row ? row.updated_at : null });
+        }
+        if (request.method === "PUT") {
+          const body = await request.text();
+          if (body.length > 200000) return json({ error: "Estado demasiado grande" }, 413);
+          JSON.parse(body); // valida JSON
+          await env.DB.prepare(
+            "INSERT INTO workspaces (email, state, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(email) DO UPDATE SET state = excluded.state, updated_at = CURRENT_TIMESTAMP"
+          ).bind(userEmail, body).run();
+          return json({ ok: true });
+        }
+        return json({ error: "Método no permitido" }, 405);
+      } catch (err) {
+        return json({ error: "Solicitud inválida" }, 400);
+      }
+    }
 
     if (url.pathname === "/api/projects") {
       try {
