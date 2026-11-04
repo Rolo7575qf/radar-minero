@@ -36,6 +36,14 @@ export const App: React.FC = () => {
   const [projects, setProjects] = useState<MiningProject[]>([]);
   const [signals, setSignals] = useState<EarlySignal[]>([]);
   const [opportunities, setOpportunities] = useState<CommercialOpportunity[]>([]);
+  const sources = useMemo(() => [...new Set(signals.map((sg) => sg.originalSource).filter(Boolean))], [signals]);
+  const lastSignalDate = useMemo(() => {
+    const dates = signals.map((sg) => sg.publishedDate).filter(Boolean).sort();
+    const d = dates[dates.length - 1];
+    if (!d) return '';
+    const [y, m, day] = d.split('-');
+    return day && m ? `${day}-${m}` : d;
+  }, [signals]);
   const { companies, relations } = useMemo(() => buildEcosystem(projects, opportunities), [projects, opportunities]);
   const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
   const [activeDashboardId, setActiveDashboardId] = useState<string>('');
@@ -254,6 +262,8 @@ export const App: React.FC = () => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onResetData={handleRestoreDefaults}
+        sources={sources}
+        lastSignalDate={lastSignalDate}
       />
 
       {/* Main Layout Body */}
@@ -268,6 +278,7 @@ export const App: React.FC = () => {
             companies: companies.length,
             opportunities: filteredOpportunitiesByCountry.length,
           }}
+          sources={sources}
         />
 
         {/* Content View Area */}

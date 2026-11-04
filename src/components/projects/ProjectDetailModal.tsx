@@ -133,7 +133,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             <div className="flex items-center gap-2 text-slate-300">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>
-                <strong>Fuentes Oficiales Validadas:</strong> {project.informationSources.join(' · ')}
+                <strong>Fuentes:</strong> {project.informationSources.join(' · ')}
               </span>
             </div>
           </div>

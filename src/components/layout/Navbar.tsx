@@ -19,6 +19,8 @@ interface NavbarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onResetData: () => void;
+  sources?: string[];
+  lastSignalDate?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -29,6 +31,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   searchQuery,
   onSearchChange,
   onResetData,
+  sources = [],
+  lastSignalDate = '',
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
@@ -112,7 +116,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Data Sources Health Pill */}
           <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-[11px] text-emerald-400">
             <Database className="w-3 h-3" />
-            <span>5 Fuentes Online</span>
+            <span title={sources.join(' · ')}>
+              {sources.length} {sources.length === 1 ? 'fuente' : 'fuentes'} con señales
+              {lastSignalDate ? ` · última ${lastSignalDate}` : ''}
+            </span>
           </div>
 
           {/* Reset / Restore Demo Button */}

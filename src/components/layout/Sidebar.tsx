@@ -24,12 +24,14 @@ interface SidebarProps {
     companies: number;
     opportunities: number;
   };
+  sources?: string[];
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onTabChange,
   counts,
+  sources = [],
 }) => {
   const navItems = [
     {
@@ -150,12 +152,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1">
             <ShieldCheck className="w-3 h-3 text-emerald-400" />
-            <span>Fuentes Oficiales:</span>
+            <span>Fuentes con señales:</span>
           </span>
-          <span className="text-slate-400 font-mono">SEIA/COCHILCO</span>
+          <span className="text-slate-400 font-mono text-right">{sources.length ? sources.join(' · ') : 'sin datos'}</span>
         </div>
         <div className="mt-1 text-[9px] text-slate-500">
-          Trazabilidad inmutable activada
+          Historial de cambios por proyecto
         </div>
       </div>
     </aside>
