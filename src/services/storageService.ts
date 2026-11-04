@@ -151,5 +151,60 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEYS.DASHBOARDS, JSON.stringify(defaultDashboards));
     localStorage.setItem(STORAGE_KEYS.ACTIVE_DASHBOARD_ID, defaultDashboards[0].id);
     localStorage.setItem(STORAGE_KEYS.SCORING_WEIGHTS, JSON.stringify(DEFAULT_WEIGHTS));
-  }
+  },
+
+  /**
+   * Intenta sincronizar datos en vivo con Cloudflare D1 en producción.
+   * Si no está disponible o falla la red, conserva los datos locales transparentemente.
+   */
+  async syncWithCloudflareD1(): Promise<{
+    projects?: MiningProject[];
+    signals?: EarlySignal[];
+    opportunities?: CommercialOpportunity[];
+  } | null> {
+    try {
+      const [projRes, sigRes, oppRes] = await Promise.allSettled([
+        fetch('/api/projects'),
+        fetch('/api/signals'),
+        fetch('/api/opportunities'),
+      ]);
+
+      let updatedProjects: MiningProject[] | undefined;
+      let updatedSignals: EarlySignal[] | undefined;
+      let updatedOpps: CommercialOpportunity[] | undefined;
+
+      if (projRes.status === 'fulfilled' && projRes.value.ok) {
+        const data = await projRes.value.json();
+        if (Array.isArray(data) && data.length > 0) {
+          updatedProjects = data;
+          this.saveProjects(data);
+        }
+      }
+
+      if (sigRes.status === 'fulfilled' && sigRes.value.ok) {
+        const data = await sigRes.value.json();
+        if (Array.isArray(data) && data.length > 0) {
+          updatedSignals = data;
+          this.saveSignals(data);
+        }
+      }
+
+      if (oppRes.status === 'fulfilled' && oppRes.value.ok) {
+        const data = await oppRes.value.json();
+        if (Array.isArray(data) && data.length > 0) {
+          updatedOpps = data;
+          this.saveOpportunities(data);
+        }
+      }
+
+      return {
+        projects: updatedProjects,
+        signals: updatedSignals,
+        opportunities: updatedOpps,
+      };
+    } catch {
+      // Entorno local o sin Cloudflare D1 activo: fallback silencioso a localStorage
+      return null;
+    }
+  },
 };

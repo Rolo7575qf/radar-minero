@@ -1,0 +1,241 @@
+-- ==============================================================================
+-- RADAR MINERO — SEED DE DATOS PARA CLOUDFLARE D1
+-- ==============================================================================
+
+-- 1. PROYECTOS MINEROS
+INSERT OR IGNORE INTO projects (
+  id, name, country, region, location_details, latitude, longitude,
+  owner_company, associated_companies, main_mineral, project_type,
+  capex_estimated_millions_usd, productive_capacity, estimated_start_date,
+  estimated_commissioning_date, current_status, stage, information_sources,
+  last_update_date, signals_count, epcm_company, key_contractors
+) VALUES
+(
+  'proj-centinela-2',
+  'Nueva Centinela (Segunda Concentradora)',
+  'Chile',
+  'Antofagasta',
+  'Comuna de Sierra Gorda, a 140 km al noreste de Antofagasta',
+  -22.9567,
+  -69.1834,
+  'Antofagasta Minerals',
+  '["Marubeni Corporation (30%)", "Antofagasta plc (70%)"]',
+  'Cobre',
+  'Brownfield',
+  4400.0,
+  '170.000 ton Cu fino/año adicionales y 95.000 ton de mineral/día',
+  '2024-Q2',
+  '2027-Q4',
+  'En construcción',
+  '11. Construcción',
+  '["COCHILCO - Cartera Inversión Minera", "SEA - RCA N° 0436/2016", "CMF Hecho Esencial"]',
+  '2026-10-18',
+  14,
+  'Fluor Chile / Ausenco',
+  '["Sigdo Koppers (Montaje electromecánico)", "SalfaCorp (Obras civiles)"]'
+),
+(
+  'proj-nuevaunion',
+  'Proyecto NuevaUnión (Relincho + El Morro)',
+  'Chile',
+  'Atacama',
+  'Provincia de Huasco, cordillera de Vallenar y Alto del Carmen',
+  -28.7512,
+  -70.1245,
+  'NuevaUnión SpA (Joint Venture Teck - Newmont)',
+  '["Teck Resources (50%)", "Newmont Corporation (50%)"]',
+  'Cobre',
+  'Greenfield',
+  7200.0,
+  '224.000 ton Cu fino/año y 269.000 oz Au/año en Fase 1 y 2',
+  '2027-Q1',
+  '2030-Q3',
+  'En evaluación',
+  '8. Permisos y aprobaciones',
+  '["SEA - Expediente EIA", "COCHILCO", "SEDAR+ Technical Report NI 43-101"]',
+  '2026-10-25',
+  19,
+  'Bechtel / Wood Group',
+  '["WSP Chile (Estudios Ambientales)", "SRK Consulting (Geotecnia)"]'
+),
+(
+  'proj-los-bronces-integrado',
+  'Los Bronces Integrado (LBI)',
+  'Chile',
+  'Metropolitana y Valparaíso',
+  'Comunas de Lo Barnechea y Colina (RM) y Los Andes (Valparaíso)',
+  -33.1458,
+  -70.2972,
+  'Anglo American Sur',
+  '["Anglo American plc (50.1%)", "Codelco-Mitsui (29.5%)", "Mitsubishi Corp (20.4%)"]',
+  'Cobre',
+  'Brownfield',
+  3300.0,
+  'Mantiene producción de 350.000 ton Cu fino/año extendiendo vida útil a 2036+',
+  '2025-Q1',
+  '2028-Q2',
+  'Activo',
+  '7. Ingeniería de detalle',
+  '["Resolución Comité de Ministros / SEA", "CMF - Estados Financieros", "SERNAGEOMIN"]',
+  '2026-11-01',
+  16,
+  'Hatch / Jacobs',
+  '["Geovita / Redpath (Túneles)", "Echeverría Izquierdo"]'
+),
+(
+  'proj-vizcachitas',
+  'Proyecto Vizcachitas',
+  'Chile',
+  'Valparaíso',
+  'Comuna de Putaendo, Provincia de San Felipe',
+  -32.4289,
+  -70.4711,
+  'Los Andes Copper Ltd.',
+  '["Queen’s Road Capital", "Resource Capital Funds"]',
+  'Cobre',
+  'Greenfield',
+  2440.0,
+  '153.000 ton Cu equivalente/año durante primeros 8 años',
+  '2027-Q3',
+  '2030-Q4',
+  'En evaluación',
+  '5. Factibilidad',
+  '["SEDAR+ NI 43-101 PFS", "SEA Estudio en elaboración", "TSX Announcements"]',
+  '2026-10-29',
+  11,
+  'Ausenco Engineering',
+  '["Klohn Crippen Berger (Relaves)", "BGC Engineering"]'
+),
+(
+  'proj-maricunga-litio',
+  'Proyecto Blanco (Salar de Maricunga)',
+  'Chile',
+  'Atacama',
+  'Salar de Maricunga, a 160 km al noreste de Copiapó',
+  -26.9123,
+  -69.2156,
+  'Codelco Litio / Minera Salar Blanco',
+  '["Lithium Power International (Codelco)"]',
+  'Litio',
+  'Greenfield',
+  700.0,
+  '20.000 ton LCE (Carbonato de Litio Grado Batería)/año',
+  '2026-Q4',
+  '2028-Q4',
+  'Activo',
+  '8. Permisos y aprobaciones',
+  '["SEA - RCA N° 094/2020", "CMF Hecho Esencial Codelco", "Estrategia Nacional del Litio"]',
+  '2026-10-15',
+  9,
+  'Worley / GEA Messo',
+  '["Stantec (Modelamiento hidrogeológico)", "Worley Chile"]'
+);
+
+-- 2. HISTORIAL INMUTABLE DE PROYECTOS
+INSERT OR IGNORE INTO project_history (
+  id, project_id, event_date, signal_title, source, previous_stage, new_stage,
+  previous_capex, new_capex, change_description, commercial_interpretation,
+  potential_impact, confidence_level
+) VALUES
+(
+  'hist-cent-01',
+  'proj-centinela-2',
+  '2023-12-19',
+  'Aprobación Decisión Final de Inversión (FID)',
+  'CMF Hecho Esencial',
+  '9. Decisión de inversión',
+  '10. Contratación',
+  3700.0,
+  4400.0,
+  'Directorio aprueba formalmente financiamiento y paquete financiero sindicado de US$ 2.500M.',
+  'Apertura inmediata de paquetes de licitación mayores para obras tempranas y campamentos.',
+  'Liberación de órdenes de compra para molinos SAG y celdas de flotación.',
+  'Alta'
+),
+(
+  'hist-nu-01',
+  'proj-nuevaunion',
+  '2024-03-15',
+  'Ingreso de Adenda Complementaria N° 3 al SEIA',
+  'SEA / SEIA',
+  '5. Factibilidad',
+  '8. Permisos y aprobaciones',
+  6500.0,
+  7200.0,
+  'Respuesta formal a observaciones ciudadanas y organismos sectoriales sobre la huella hídrica y mineroducto.',
+  'Indica resolución de observaciones críticas previo a la votación de la Comisión de Evaluación Ambiental.',
+  'Avance hacia la RCA favorable requerida para la Decisión Final de Inversión (FID).',
+  'Alta'
+);
+
+-- 3. SEÑALES TEMPRANAS
+INSERT OR IGNORE INTO signals (
+  id, name, category, description, original_source, source_url, country,
+  published_date, related_project_id, related_project_name, related_company,
+  project_stage, relevance, confidence, commercial_interpretation, validation_state
+) VALUES
+(
+  'sig-sea-nu-2026-01',
+  'Ingreso de Adenda Complementaria N° 3 y Estudio de Relaves Espesados',
+  'Ambiental',
+  'NuevaUnión ingresó ante el SEA Atacama la Adenda N° 3 respondiendo al ICSARA final sobre estabilidad física del tranque y tuberías.',
+  'SEA / SEIA',
+  'https://seia.sea.gob.cl',
+  'Chile',
+  '2026-10-14',
+  'proj-nuevaunion',
+  'Proyecto NuevaUnión (Relincho + El Morro)',
+  'NuevaUnión SpA (Teck - Newmont)',
+  '8. Permisos y aprobaciones',
+  'Crítica',
+  'Alta',
+  '{"hypothesis":"El proyecto se encuentra en la recta final de obtención de la RCA favorable (estimada para Q1 2027), lo que gatillará licitaciones de ingeniería de detalle y preparación de obras tempranas.","potentialNeeds":["Monitoreo hidrogeológico en línea y telemetría de napas subterráneas","Modelación avanzada de reología de relaves espesados","Ingeniería de detalle para caminos de acceso cordilleranos"],"targetServices":["Consultoría geotécnica","Ingeniería hidráulica","Obras tempranas"],"anticipationWindowMonths":8,"supportingEvidence":["Adenda responde a los últimos 4 servicios públicos pendientes en Atacama"]}',
+  'Verificada'
+),
+(
+  'sig-cont-cent-2026-02',
+  'Fluor Chile abre precalificación de subcontratos electromecánicos para Concentradora 2',
+  'Contratación',
+  'Fluor Chile, en su calidad de EPCM de Nueva Centinela, ha publicado en plataforma privada de proveedores el requerimiento de precalificación para montaje.',
+  'Corporativo / Prensa',
+  'https://aminerals.cl',
+  'Chile',
+  '2026-10-22',
+  'proj-centinela-2',
+  'Nueva Centinela (Segunda Concentradora)',
+  'Antofagasta Minerals / Fluor',
+  '11. Construcción',
+  'Crítica',
+  'Alta',
+  '{"hypothesis":"Fluor está armando la matriz de proveedores secundarios antes de la adjudicación del contrato mayor de montaje. Momento exacto para proveedores de soporte especializado, grúas y ensayos no destructivos.","potentialNeeds":["Arriendo de grúas de alto tonelaje (500t - 800t)","Servicios de inspección técnica, control de calidad y ensayos no destructivos (NDT)","Sistemas de piping de alta aleación"],"targetServices":["Montaje electromecánico","Arriendo maquinaria pesada","Inspección técnica (ITO)"],"anticipationWindowMonths":3,"supportingEvidence":["Fluor ha enviado invitaciones RFI a contratistas Tier 1 y Tier 2"]}',
+  'Confirmada por analista'
+);
+
+-- 4. OPORTUNIDADES COMERCIALES B2B
+INSERT OR IGNORE INTO opportunities (
+  id, title, related_project_id, related_project_name, target_company, country,
+  project_stage, originating_signal_ids, originating_signal_names, detection_date,
+  potential_need, related_solution_category, anticipation_window_months, priority,
+  confidence, recommended_next_action, commercial_status, estimated_contract_value_usd, scoring
+) VALUES
+(
+  'opp-cent-01',
+  'Subcontrato de Ensayos No Destructivos (NDT) e Inspección Técnica EPCM',
+  'proj-centinela-2',
+  'Nueva Centinela (Segunda Concentradora)',
+  'Fluor Chile / Antofagasta Minerals',
+  'Chile',
+  '11. Construcción',
+  '["sig-cont-cent-2026-02"]',
+  '["Fluor Chile abre precalificación de subcontratos electromecánicos para Concentradora 2"]',
+  '2026-10-23',
+  'Inspección técnica independiente de soldaduras críticas de molinos SAG y líneas de tuberías de alta presión para concentrado y agua.',
+  'Inspección Técnica (ITO) / Ensayos No Destructivos',
+  3,
+  'Máxima',
+  'Alta',
+  'Enviar dossier técnico de acreditaciones ISO/NCh a Loreto Valenzuela (Fluor) y solicitar inclusión inmediata en la lista de proveedores homologados.',
+  'Precalificación Abierta',
+  3800000.0,
+  '{"totalScore":88,"maturityScore":19,"recentSignalsScore":19,"serviceFitScore":17,"actorsIdentifiedScore":14,"economicSizeScore":14,"anticipationWindowScore":5,"maturityExplanation":"Etapa óptima de definición contractual e ingeniería de detalle.","recentSignalsExplanation":"Alta actividad: señales críticas recientes de contratación.","serviceFitExplanation":"Elevada demanda técnica alineada con especialidad de contratistas.","actorsIdentifiedExplanation":"Ecosistema mapeado: Fluor y Antofagasta Minerals con decisores identificados.","economicSizeExplanation":"Megaproyecto clase mundial (US$ 4.400M CAPEX).","anticipationWindowExplanation":"Ventana corta (3 meses): requiere contacto urgente."}'
+);

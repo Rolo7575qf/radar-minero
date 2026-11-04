@@ -51,7 +51,7 @@ export const App: React.FC = () => {
   const [selectedCompany, setSelectedCompany] = useState<MiningCompany | null>(null);
   const [selectedOpportunity, setSelectedOpportunity] = useState<CommercialOpportunity | null>(null);
 
-  // Initialize data from local storage
+  // Initialize data from local storage and sync with Cloudflare D1
   useEffect(() => {
     setProjects(storageService.getProjects());
     setSignals(storageService.getSignals());
@@ -61,6 +61,15 @@ export const App: React.FC = () => {
     setDashboards(storageService.getDashboards());
     setActiveDashboardId(storageService.getActiveDashboardId());
     setScoringWeights(storageService.getScoringWeights());
+
+    // Sincronización en segundo plano con Cloudflare D1 (si está desplegado en Cloudflare)
+    storageService.syncWithCloudflareD1().then((synced) => {
+      if (synced) {
+        if (synced.projects) setProjects(synced.projects);
+        if (synced.signals) setSignals(synced.signals);
+        if (synced.opportunities) setOpportunities(synced.opportunities);
+      }
+    });
   }, []);
 
   // Filter projects/signals by global search or country
