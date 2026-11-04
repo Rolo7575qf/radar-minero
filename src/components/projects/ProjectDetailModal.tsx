@@ -46,8 +46,18 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 {project.currentStatus}
               </span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400">
-                {project.projectType}
+                {project.submissionType && project.submissionType !== 'No informado' ? project.submissionType : 'Tipo no informado'}
               </span>
+              {project.seiaId && (
+                <a
+                  href={`https://seia.sea.gob.cl/expediente/expediente.php?id_expediente=${project.seiaId}&modo=ficha`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded bg-sky-950/80 text-sky-300 border border-sky-800/60 hover:text-sky-200"
+                >
+                  <ExternalLink className="w-3 h-3" /> Expediente SEIA {project.seiaId}
+                </a>
+              )}
             </div>
 
             <h2 className="text-xl font-extrabold text-white">

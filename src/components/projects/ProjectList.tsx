@@ -31,13 +31,13 @@ export const ProjectList: React.FC<ProjectListProps> = ({
   const [selectedType, setSelectedType] = useState<string>('Todos');
 
   const MINERALS = ['Todos', 'Cobre', 'Litio', 'Oro', 'Molibdeno', 'Hierro'];
-  const TYPES = ['Todos', 'Greenfield', 'Brownfield'];
+  const TYPES = ['Todos', 'EIA', 'DIA'];
 
   const filteredProjects = projects.filter((p) => {
     const matchesCountry = selectedCountry === 'Todos' || p.country === selectedCountry;
     const matchesMineral = selectedMineral === 'Todos' || p.mainMineral === selectedMineral;
     const matchesStage = selectedStage === 'Todas' || p.stage === selectedStage;
-    const matchesType = selectedType === 'Todos' || p.projectType === selectedType;
+    const matchesType = selectedType === 'Todos' || p.submissionType === selectedType;
     const matchesSearch =
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.ownerCompany.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -122,9 +122,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({
               onChange={(e) => setSelectedType(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-400"
             >
-              <option value="Todos">Tipo: Greenfield / Brownfield</option>
-              <option value="Greenfield">Greenfield</option>
-              <option value="Brownfield">Brownfield</option>
+              <option value="Todos">Tipo de presentación: EIA / DIA</option>
+              <option value="EIA">EIA (Estudio de Impacto Ambiental)</option>
+              <option value="DIA">DIA (Declaración de Impacto Ambiental)</option>
             </select>
           </div>
         </div>
@@ -149,7 +149,7 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                     {p.country}
                   </span>
                   <span className="text-[10px] font-medium text-slate-400">
-                    {p.projectType}
+                    {p.submissionType && p.submissionType !== 'No informado' ? p.submissionType : 'Tipo no informado'}
                   </span>
                 </div>
                 <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded">

@@ -58,6 +58,8 @@ export interface MiningProject {
   mainMineral: MineralType;
   secondaryMinerals?: MineralType[];
   projectType: ProjectType;
+  submissionType?: 'EIA' | 'DIA' | 'No informado'; // Tipo de presentación ante el SEIA
+  seiaId?: string | null; // ID del expediente en el SEIA
   capexEstimatedMillionsUSD: number;
   productiveCapacity?: string;
   estimatedStartDate?: string;
