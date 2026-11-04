@@ -9,8 +9,8 @@ const STORAGE_KEYS = {
   PROJECTS: 'radar_minero_projects_v2',
   SIGNALS: 'radar_minero_signals_v2',
   OPPORTUNITIES: 'radar_minero_opportunities_v2',
-  DASHBOARDS: 'radar_minero_dashboards_v1',
-  ACTIVE_DASHBOARD_ID: 'radar_minero_active_dashboard_id_v1',
+  DASHBOARDS: 'radar_minero_dashboards_v2',
+  ACTIVE_DASHBOARD_ID: 'radar_minero_active_dashboard_id_v2',
   SCORING_WEIGHTS: 'radar_minero_scoring_weights_v1',
 };
 

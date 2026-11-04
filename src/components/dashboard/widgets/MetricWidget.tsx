@@ -21,26 +21,38 @@ export const MetricWidget: React.FC<MetricWidgetProps> = ({
   let displayValue: string | number = 0;
   let subtitle = '';
   let Icon = TrendingUp;
-  let trendText = '+12% vs mes anterior';
+  let chipText = '';
+  const DAY = 86400000;
+  const within30 = (d?: string) => {
+    const t = d ? Date.parse(d) : NaN;
+    return !isNaN(t) && Date.now() - t <= 30 * DAY;
+  };
 
   if (widget.metric === 'project_count') {
     displayValue = projects.length;
     const totalCapex = projects.reduce((acc, p) => acc + (p.capexEstimatedMillionsUSD || 0), 0);
-    subtitle = `CAPEX total acumulado: US$ ${(totalCapex / 1000).toFixed(1)} mil millones`;
+    subtitle = `CAPEX declarado acumulado: US$ ${(totalCapex / 1000).toFixed(1)} mil millones`;
+    chipText = `${projects.filter(p => within30(p.lastUpdateDate)).length} actualizados en 30 días`;
     Icon = Pickaxe;
   } else if (widget.metric === 'signal_count') {
-    displayValue = signals.length;
-    subtitle = 'Señales ambientales, inversión y contratación activas';
+    const recent = signals.filter(sg => within30(sg.publishedDate));
+    displayValue = recent.length;
+    subtitle = 'Señales publicadas en fuentes oficiales y prensa en los últimos 30 días';
+    chipText = `${recent.filter(sg => sg.relevance === 'Crítica' || sg.relevance === 'Alta').length} de relevancia alta o crítica`;
     Icon = Radio;
   } else if (widget.metric === 'opportunity_count') {
     const highPriorities = opportunities.filter(o => o.priority === 'Máxima' || o.priority === 'Alta');
     displayValue = highPriorities.length;
-    subtitle = `${opportunities.length} oportunidades totales mapeadas con decisores`;
+    const withDm = opportunities.filter(o => (o.keyDecisionMakers || []).length > 0).length;
+    subtitle = `${opportunities.length} oportunidades en total`;
+    chipText = `${withDm} de ${opportunities.length} con decisores mapeados`;
     Icon = Target;
   } else if (widget.metric === 'total_capex') {
     const total = projects.reduce((acc, p) => acc + (p.capexEstimatedMillionsUSD || 0), 0);
     displayValue = `US$ ${(total / 1000).toFixed(1)}B`;
-    subtitle = `Promedio: US$ ${(total / (projects.length || 1)).toFixed(0)}M por proyecto`;
+    const withCapex = projects.filter(p => (p.capexEstimatedMillionsUSD || 0) > 0).length;
+    subtitle = `Promedio: US$ ${(total / (withCapex || 1)).toFixed(0)}M por proyecto con CAPEX declarado`;
+    chipText = `${withCapex} de ${projects.length} con CAPEX declarado`;
     Icon = DollarSign;
   } else {
     displayValue = projects.length;
@@ -64,9 +76,11 @@ export const MetricWidget: React.FC<MetricWidgetProps> = ({
           <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-mono">
             {displayValue}
           </span>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800/50">
-            {trendText}
-          </span>
+          {chipText && (
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/60">
+              {chipText}
+            </span>
+          )}
         </div>
         <p className="text-xs text-slate-400 mt-2 font-medium">
           {subtitle}

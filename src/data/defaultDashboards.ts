@@ -23,25 +23,25 @@ export const defaultDashboards: DashboardConfig[] = [
       },
       {
         id: 'w-kpi-2',
-        title: 'Señales Críticas (30 días)',
+        title: 'Señales detectadas (30 días)',
         type: 'kpi_metric',
         dimension: 'signal_category',
         metric: 'signal_count',
         width: 'third',
         height: 'sm',
         colorScheme: 'cyan',
-        customDescription: 'Eventos ambientales, de inversión y de contratación detectados'
+        customDescription: 'Eventos ambientales, de inversión y de contratación publicados en los últimos 30 días'
       },
       {
         id: 'w-kpi-3',
-        title: 'Oportunidades Máxima Prioridad',
+        title: 'Oportunidades prioritarias',
         type: 'kpi_metric',
         dimension: 'opportunity_priority',
         metric: 'opportunity_count',
         width: 'third',
         height: 'sm',
         colorScheme: 'emerald',
-        customDescription: 'Scoring comercial > 80 pts con decisores y ventana comercial activa'
+        customDescription: 'Prioridad Alta o Máxima (puntaje de 68 o más sobre 100)'
       },
       {
         id: 'w-stage-funnel',
