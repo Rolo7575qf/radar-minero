@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar, ActiveTab } from './components/layout/Sidebar';
 import { DashboardView } from './components/dashboard/DashboardView';
@@ -22,6 +22,7 @@ import { CommercialOpportunity, ScoringWeights } from './types/opportunity';
 import { DashboardConfig } from './types/dashboard';
 
 import { storageService } from './services/storageService';
+import { buildEcosystem } from './services/ecosystemBuilder';
 import { signalEngine, IngestSignalPayload } from './services/signalEngine';
 import { calculateOpportunityScore, getPriorityFromScore } from './services/scoringService';
 
@@ -34,9 +35,8 @@ export const App: React.FC = () => {
   // Core Data State
   const [projects, setProjects] = useState<MiningProject[]>([]);
   const [signals, setSignals] = useState<EarlySignal[]>([]);
-  const [companies, setCompanies] = useState<MiningCompany[]>([]);
-  const [relations, setRelations] = useState(storageService.getEcosystemRelations());
   const [opportunities, setOpportunities] = useState<CommercialOpportunity[]>([]);
+  const { companies, relations } = useMemo(() => buildEcosystem(projects, opportunities), [projects, opportunities]);
   const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
   const [activeDashboardId, setActiveDashboardId] = useState<string>('');
   const [scoringWeights, setScoringWeights] = useState<ScoringWeights>(storageService.getScoringWeights());
@@ -55,8 +55,6 @@ export const App: React.FC = () => {
   useEffect(() => {
     setProjects(storageService.getProjects());
     setSignals(storageService.getSignals());
-    setCompanies(storageService.getCompanies());
-    setRelations(storageService.getEcosystemRelations());
     setOpportunities(storageService.getOpportunities());
     setDashboards(storageService.getDashboards());
     setActiveDashboardId(storageService.getActiveDashboardId());
@@ -191,7 +189,6 @@ export const App: React.FC = () => {
     storageService.resetAllToDefaults();
     setProjects(storageService.getProjects());
     setSignals(storageService.getSignals());
-    setCompanies(storageService.getCompanies());
     setOpportunities(storageService.getOpportunities());
     setDashboards(storageService.getDashboards());
     setActiveDashboardId(storageService.getActiveDashboardId());
