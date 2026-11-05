@@ -31,46 +31,40 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-slate-950 border border-slate-800 rounded-[16px] w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-800 flex items-start justify-between bg-slate-950/70">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant={project.mainMineral === 'Litio' ? 'cyan' : 'amber'} size="md">
-                {project.mainMineral}
-              </Badge>
-              <span className="text-xs font-mono font-semibold text-slate-300 bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-700">
-                {project.country} · {project.region}
-              </span>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
-                {project.currentStatus}
-              </span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400">
-                {project.submissionType && project.submissionType !== 'No informado' ? project.submissionType : 'Tipo no informado'}
-              </span>
+        <div className="relative px-6 py-6 border-b border-slate-800 flex items-start justify-between gap-6 bg-slate-900 ic-dot-grid">
+          <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-400" />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="ic-rule" />
+              <span className="ic-eyebrow text-[10px] text-amber-400">Ficha de proyecto · {project.region}</span>
+            </div>
+            <h2 className="ic-display text-white text-[26px] sm:text-[30px] mt-3">
+              {project.name}<span className="text-amber-400">.</span>
+            </h2>
+            <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-300">
+              <Building2 className="w-3.5 h-3.5 text-amber-400" strokeWidth={1.5} />
+              <span>{project.ownerCompany}</span>
+              {project.associatedCompanies && project.associatedCompanies.length > 0 && (
+                <span className="text-slate-500">(Socios: {project.associatedCompanies.join(', ')})</span>
+              )}
+            </div>
+            <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+              <span className="ic-eyebrow text-[9px] px-2 py-1 rounded-[4px] bg-amber-400 text-slate-950">{project.mainMineral}</span>
+              {project.submissionType && project.submissionType !== 'No informado' && (
+                <span className="ic-mono text-[10px] font-bold px-2 py-0.5 rounded-[4px] border border-slate-700 text-white">{project.submissionType}</span>
+              )}
+              <span className="text-[11px] text-slate-400 px-1">{project.currentStatus}</span>
               {project.seiaId && (
                 <a
                   href={`https://seia.sea.gob.cl/expediente/expediente.php?id_expediente=${project.seiaId}&modo=ficha`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded bg-sky-950/80 text-sky-300 border border-sky-800/60 hover:text-sky-200"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-[4px] bg-white text-slate-950 hover:bg-amber-400 transition"
                 >
                   <ExternalLink className="w-3 h-3" /> Expediente SEIA {project.seiaId}
                 </a>
-              )}
-            </div>
-
-            <h2 className="text-xl font-extrabold text-white">
-              {project.name}
-            </h2>
-
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Building2 className="w-3.5 h-3.5 text-amber-400" />
-              <span>Titular: <strong className="text-slate-200">{project.ownerCompany}</strong></span>
-              {project.associatedCompanies && project.associatedCompanies.length > 0 && (
-                <span className="text-slate-500">
-                  (Socios: {project.associatedCompanies.join(', ')})
-                </span>
               )}
             </div>
           </div>
@@ -91,8 +85,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               <span className="text-[10px] uppercase font-bold text-slate-500 block">
                 CAPEX Estimado
               </span>
-              <span className="text-xl font-extrabold text-amber-400 font-mono mt-1 block">
-                US$ {project.capexEstimatedMillionsUSD.toLocaleString()}M
+              <span className="ic-display text-[24px] text-amber-400 mt-2 block leading-none">
+                US${project.capexEstimatedMillionsUSD.toLocaleString('es-CL')} MM
               </span>
               <span className="text-[10px] text-slate-400">Inversión Total</span>
             </div>
@@ -121,7 +115,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               <span className="text-[10px] uppercase font-bold text-slate-500 block">
                 Señales Registradas
               </span>
-              <span className="text-xl font-extrabold text-emerald-400 font-mono mt-1 block">
+              <span className="text-xl font-extrabold text-amber-400 font-mono mt-1 block">
                 {project.signalsCount}
               </span>
               <span className="text-[10px] text-slate-400">Última: {project.lastUpdateDate}</span>
@@ -141,7 +135,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               </div>
             )}
             <div className="flex items-center gap-2 text-slate-300">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
                 <strong>Fuentes:</strong> {project.informationSources.join(' · ')}
               </span>
@@ -199,7 +193,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   Cada hito preserva su registro histórico sin sobrescribirse (Línea de tiempo auditable)
                 </p>
               </div>
-              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">
+              <span className="text-[10px] font-mono text-amber-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">
                 {project.history?.length || 0} eventos registrados
               </span>
             </div>
@@ -235,7 +229,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                         )}
                         {entry.previousCapex && entry.newCapex && (
                           <span className="text-slate-300">
-                            CAPEX: <s className="text-slate-500">US$ {entry.previousCapex}M</s> → <strong className="text-emerald-400">US$ {entry.newCapex}M</strong>
+                            CAPEX: <s className="text-slate-500">US$ {entry.previousCapex}M</s> → <strong className="text-amber-400">US$ {entry.newCapex}M</strong>
                           </span>
                         )}
                       </div>

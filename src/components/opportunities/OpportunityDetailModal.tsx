@@ -49,7 +49,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   if (!opportunity) return null;
 
   const priorityColors = {
-    'Máxima': 'bg-emerald-950/80 text-emerald-300 border-emerald-800/80',
+    'Máxima': 'bg-emerald-950/80 text-amber-300 border-emerald-800/80',
     'Alta': 'bg-amber-950/80 text-amber-300 border-amber-800/80',
     'Media': 'bg-cyan-950/80 text-cyan-300 border-cyan-800/80',
     'Baja-media': 'bg-slate-800 text-slate-300 border-slate-700',
@@ -59,51 +59,44 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-slate-950 border border-slate-800 rounded-[16px] w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-800 flex items-start justify-between bg-slate-950/70">
-          <div className="space-y-1.5 max-w-2xl">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span
-                className={`text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
-                  priorityColors[opportunity.priority]
-                }`}
-              >
-                Prioridad {opportunity.priority}
-              </span>
-              <span className="text-xs font-mono font-bold text-white bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-700">
-                Score: {scoring.totalScore} / 100 pts
-              </span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                {opportunity.commercialStatus}
-              </span>
+        <div className="relative px-6 py-6 border-b border-slate-800 flex items-start justify-between gap-6 bg-slate-900 ic-dot-grid">
+          <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-400" />
+          <div className="min-w-0 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <span className="ic-rule" />
+              <span className="ic-eyebrow text-[10px] text-amber-400">Oportunidad · Prioridad {opportunity.priority}</span>
             </div>
-
-            <h2 className="text-lg font-extrabold text-white leading-snug">
-              {opportunity.title}
-            </h2>
-
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Building2 className="w-3.5 h-3.5 text-amber-400" />
-              <span>
-                Empresa Objetivo: <strong className="text-slate-200">{opportunity.targetCompany}</strong>
+            <h2 className="text-[22px] font-bold text-white leading-tight mt-3">{opportunity.title}</h2>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
+              <span className="flex items-center gap-1.5 text-slate-300">
+                <Building2 className="w-3.5 h-3.5 text-amber-400" strokeWidth={1.5} />
+                {opportunity.targetCompany}
               </span>
-              <span>·</span>
-              <span
+              <button
                 onClick={() => onOpenProject && onOpenProject(opportunity.relatedProjectId)}
-                className="text-amber-400 hover:underline cursor-pointer font-medium"
+                className="text-amber-400 hover:text-amber-300 font-bold"
               >
-                Proyecto: {opportunity.relatedProjectName} ({opportunity.country})
-              </span>
+                Ver proyecto: {opportunity.relatedProjectName} →
+              </button>
             </div>
           </div>
-
+          <div className="flex items-start gap-5 shrink-0">
+            <div className="text-right">
+              <div className="flex items-baseline justify-end gap-1">
+                <span className="ic-display text-[52px] leading-none text-amber-400">{scoring.totalScore}</span>
+                <span className="ic-mono text-xs text-slate-500">/100</span>
+              </div>
+              <div className="ic-eyebrow text-[9px] text-slate-500 mt-2">Puntaje</div>
+            </div>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
           >
             <X className="w-5 h-5" />
           </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -150,24 +143,24 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           )}
 
           {/* Próxima Acción Comercial Recomendada (Call to action prioritario) */}
-          <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/40 to-slate-900 border border-emerald-500/40 flex items-start gap-3 shadow-lg">
-            <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mt-0.5">
+          <div className="relative p-5 rounded-xl bg-amber-400 text-slate-950 flex items-start gap-3">
+            <div className="p-2 rounded-[6px] bg-slate-950 text-amber-400 shrink-0 mt-0.5">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">
-                Próxima Acción Comercial Recomendada:
+              <span className="ic-eyebrow text-[10px] text-slate-950 block">
+                Siguiente paso recomendado
               </span>
-              <p className="text-xs text-white font-medium mt-0.5 leading-relaxed">
+              <p className="text-sm text-slate-950 font-bold mt-1 leading-relaxed">
                 {opportunity.recommendedNextAction}
               </p>
-              <div className="mt-2 text-[11px] text-slate-400 flex items-center gap-3">
+              <div className="mt-2 text-[11px] text-slate-800 flex flex-wrap items-center gap-3">
                 <span>
-                  Ventana de Anticipación: <strong className="text-amber-400">{opportunity.anticipationWindowMonths} meses previos</strong> a licitación pública
+                  Ventana de anticipación: <strong>{opportunity.anticipationWindowMonths} meses</strong> antes de la licitación
                 </span>
                 <span>·</span>
                 <span>
-                  Valor Estimado Contrato: <strong className="text-emerald-400 font-mono">{opportunity.estimatedContractValueUSD ? `US$ ${opportunity.estimatedContractValueUSD / 1000000}M` : 'No estimado'}</strong>
+                  Valor estimado del contrato: <strong className="ic-mono">{opportunity.estimatedContractValueUSD ? `US$ ${opportunity.estimatedContractValueUSD / 1000000}M` : 'No estimado'}</strong>
                 </span>
               </div>
             </div>
@@ -240,14 +233,14 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80">
                 <div className="flex items-center justify-between font-semibold mb-1">
                   <span className="text-slate-300">3. Compatibilidad con Servicios Potenciales (Peso: 20 pts)</span>
-                  <span className="text-emerald-400 font-mono font-bold">
+                  <span className="text-amber-400 font-mono font-bold">
                     {scoring.serviceFitScore} / 20 pts
                   </span>
                 </div>
                 <div className="w-full bg-slate-800 rounded-full h-1.5 mb-1.5 overflow-hidden">
                   <div
                     style={{ width: `${(scoring.serviceFitScore / 20) * 100}%` }}
-                    className="h-full bg-emerald-500 rounded-full"
+                    className="h-full bg-amber-400 rounded-full"
                   />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-tight">
@@ -278,7 +271,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80">
                 <div className="flex items-center justify-between font-semibold mb-1">
                   <span className="text-slate-300">5. Tamaño y Viabilidad Económica (Peso: 15 pts)</span>
-                  <span className="text-rose-400 font-mono font-bold">
+                  <span className="text-amber-400 font-mono font-bold">
                     {scoring.economicSizeScore} / 15 pts
                   </span>
                 </div>
@@ -317,7 +310,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           {/* Tomadores de Decisión Mapeados */}
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 mb-2 flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-emerald-400" />
+              <Users className="w-4 h-4 text-amber-400" />
               <span>Tomadores de Decisiones Directos</span>
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

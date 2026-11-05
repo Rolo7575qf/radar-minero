@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MiningProject, MineralType, MiningStage } from '../../types/project';
 import { Badge } from '../common/Badge';
+import { SectionHeader } from '../common/SectionHeader';
 import {
   Pickaxe,
   Search,
@@ -54,35 +55,15 @@ export const ProjectList: React.FC<ProjectListProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-900/60 border border-slate-800">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
-            <Pickaxe className="w-5 h-5" />
-          </div>
-          <div>
-            <h2 className="text-base font-extrabold text-white">
-              Cartera de Proyectos Mineros Monitoreados
-            </h2>
-            <p className="text-xs text-slate-400">
-              Seguimiento desde etapas tempranas hasta construcción y operación con trazabilidad inmutable
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 text-xs font-mono self-start sm:self-auto">
-          <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-            <span className="text-[10px] text-slate-500 block uppercase font-bold">Proyectos</span>
-            <span className="text-base font-extrabold text-white">{filteredProjects.length}</span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-            <span className="text-[10px] text-slate-500 block uppercase font-bold">CAPEX Total</span>
-            <span className="text-base font-extrabold text-amber-400">
-              US$ {(totalCapex / 1000).toFixed(1)}B
-            </span>
-          </div>
-        </div>
-      </div>
+      <SectionHeader
+        eyebrow="Cartera monitoreada"
+        title="Proyectos con huellas públicas"
+        description="Cada proyecto con su etapa, su inversión declarada y el historial de hitos con fuente y fecha."
+        stats={[
+          { value: filteredProjects.length, label: 'Proyectos' },
+          { value: (totalCapex / 1000).toLocaleString('es-CL', { maximumFractionDigits: 1 }), label: 'US$ mil MM' },
+        ]}
+      />
 
       {/* Filters Bar */}
       <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
@@ -136,76 +117,58 @@ export const ProjectList: React.FC<ProjectListProps> = ({
           <div
             key={p.id}
             onClick={() => onSelectProject(p)}
-            className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-900 transition-all cursor-pointer flex flex-col justify-between group shadow-xl"
+            className="rounded-2xl bg-slate-900 border border-slate-800 hover:border-amber-400/70 hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col group overflow-hidden"
           >
-            <div>
-              {/* Top Badges */}
-              <div className="flex items-center justify-between gap-2 mb-2.5">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <Badge variant={p.mainMineral === 'Litio' ? 'cyan' : 'amber'} size="sm">
-                    {p.mainMineral}
-                  </Badge>
-                  <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-                    {p.country}
-                  </span>
-                  <span className="text-[10px] font-medium text-slate-400">
-                    {p.submissionType && p.submissionType !== 'No informado' ? p.submissionType : 'Tipo no informado'}
-                  </span>
-                </div>
-                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded">
-                  {p.currentStatus}
-                </span>
+            <div className="p-5 flex-1">
+              {/* Etiquetas */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="ic-eyebrow text-[9px] px-2 py-1 rounded-[4px] bg-amber-400 text-slate-950">{p.mainMineral}</span>
+                {p.submissionType && p.submissionType !== 'No informado' && (
+                  <span className="ic-mono text-[10px] font-bold px-2 py-0.5 rounded-[4px] border border-slate-700 text-white">{p.submissionType}</span>
+                )}
+                <span className="ic-mono text-[10px] text-slate-500 ml-auto">{p.region}</span>
               </div>
 
-              {/* Title & Owner */}
-              <h3 className="text-sm font-extrabold text-white group-hover:text-amber-300 transition leading-snug">
+              {/* Nombre y titular */}
+              <h3 className="mt-3.5 text-[15px] font-bold text-white leading-snug group-hover:text-amber-300 transition line-clamp-3">
                 {p.name}
               </h3>
-
-              <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-400">
-                <Building2 className="w-3.5 h-3.5 text-slate-500" />
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
+                <Building2 className="w-3.5 h-3.5 text-amber-400 shrink-0" strokeWidth={1.5} />
                 <span className="truncate">{p.ownerCompany}</span>
               </div>
 
-              <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-500">
-                <MapPin className="w-3.5 h-3.5 text-slate-600" />
-                <span className="truncate">{p.region}</span>
-              </div>
-
-              {/* Stage Pill */}
-              <div className="mt-3 p-2 rounded-lg bg-slate-950/80 border border-slate-800/80 text-xs">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">
-                  Etapa Actual (Clasificación 1-14)
-                </span>
-                <span className="text-xs font-bold text-cyan-300 font-mono mt-0.5 block truncate">
-                  {p.stage}
-                </span>
-              </div>
-
-              {/* EPCM info */}
-              {p.epcmCompany && (
-                <div className="mt-2 text-[11px] text-slate-400 truncate">
-                  <strong className="text-slate-300">EPCM:</strong> {p.epcmCompany}
+              {/* Etapa */}
+              <div className="mt-4 rounded-[10px] bg-slate-950 border border-slate-800 px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="ic-eyebrow text-[9px] text-slate-500">Etapa actual</span>
+                  <span className="text-[10px] text-slate-500">{p.currentStatus}</span>
                 </div>
-              )}
+                <div className="mt-1 text-[13px] font-bold text-white truncate">{p.stage.replace(/^\d+\.\s*/, '')}</div>
+                <div className="mt-2 flex gap-[3px]">
+                  {Array.from({ length: 14 }).map((_, i) => {
+                    const n = parseInt(p.stage, 10) || 0;
+                    return <span key={i} className={`h-1 flex-1 rounded-sm ${i < n ? 'bg-amber-400' : 'bg-slate-800'}`} />;
+                  })}
+                </div>
+              </div>
             </div>
 
-            {/* Bottom Meta */}
-            <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            {/* Pie */}
+            <div className="px-5 py-3.5 border-t border-slate-800 bg-gradient-to-b from-white/[0.02] to-transparent flex items-end justify-between">
               <div>
-                <span className="text-[10px] font-bold text-slate-500 uppercase block">CAPEX</span>
-                <span className="text-sm font-extrabold text-amber-400 font-mono">
-                  US$ {p.capexEstimatedMillionsUSD.toLocaleString()}M
+                <span className="ic-eyebrow text-[9px] text-slate-500 block">Inversión</span>
+                <span className="ic-display text-[20px] text-amber-400 leading-none mt-1 block">
+                  {p.capexEstimatedMillionsUSD ? `US$${p.capexEstimatedMillionsUSD.toLocaleString('es-CL')} MM` : 'No informada'}
                 </span>
               </div>
-
               <div className="text-right">
-                <span className="text-[10px] font-mono text-cyan-400 flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {p.history?.length || 0} hitos trazados
+                <span className="ic-mono text-[10px] text-slate-400 flex items-center justify-end gap-1">
+                  <Clock className="w-3 h-3" strokeWidth={1.5} />
+                  {p.history?.length || 0} {(p.history?.length || 0) === 1 ? 'hito' : 'hitos'}
                 </span>
-                <span className="text-amber-400 font-semibold flex items-center gap-0.5 group-hover:translate-x-1 transition text-[11px] mt-0.5">
-                  Ver Ficha <ChevronRight className="w-3.5 h-3.5" />
+                <span className="text-amber-400 font-bold flex items-center justify-end gap-0.5 group-hover:translate-x-1 transition text-[11px] mt-1">
+                  Ver ficha <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </div>
