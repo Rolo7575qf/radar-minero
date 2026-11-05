@@ -2,6 +2,7 @@ import { MiningProject } from '../types/project';
 import { EarlySignal } from '../types/signal';
 import { CommercialOpportunity, ScoringWeights } from '../types/opportunity';
 import { DashboardConfig } from '../types/dashboard';
+import { Actor } from '../types/company';
 import { defaultDashboards } from '../data/defaultDashboards';
 import { DEFAULT_WEIGHTS } from './scoringService';
 import { workspaceService } from './workspaceService';
@@ -130,6 +131,18 @@ export const storageService = {
       activeDashboardId: defaultDashboards[0].id,
       scoringWeights: DEFAULT_WEIGHTS,
     });
+  },
+
+  /** Actores clave (nombre, cargo, correo) desde D1. Si no hay API, devuelve lista vacía. */
+  async fetchActors(): Promise<Actor[]> {
+    try {
+      const res = await fetch('/api/actors');
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
   },
 
   /**

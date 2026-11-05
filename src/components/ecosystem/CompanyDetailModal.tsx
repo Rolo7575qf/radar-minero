@@ -159,6 +159,35 @@ export const CompanyDetailModal: React.FC<CompanyDetailModalProps> = ({
                   <div className="text-[10px] text-slate-400">
                     {contact.department}
                   </div>
+                  {contact.email && (
+                    <div className="text-[11px] flex items-center gap-1.5 flex-wrap pt-1">
+                      <a href={`mailto:${contact.email}`} className="text-cyan-400 hover:text-cyan-300 font-mono break-all">
+                        {contact.email}
+                      </a>
+                      <span
+                        className={`text-[9px] px-1.5 py-0.5 rounded border ${
+                          contact.emailStatus === 'verificado'
+                            ? 'text-emerald-400 border-emerald-700/60'
+                            : 'text-amber-400 border-amber-700/60'
+                        }`}
+                      >
+                        {contact.emailStatus === 'verificado' ? 'verificado' : 'sin verificar'}
+                      </span>
+                    </div>
+                  )}
+                  {!contact.email && (
+                    <div className="text-[10px] text-slate-500 italic pt-1">Correo pendiente de identificar</div>
+                  )}
+                  {contact.linkedinOrProfile && (
+                    <a
+                      href={contact.linkedinOrProfile}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-indigo-400 hover:text-indigo-300 inline-block"
+                    >
+                      Ver perfil en LinkedIn
+                    </a>
+                  )}
                 </div>
               ))}
             </div>

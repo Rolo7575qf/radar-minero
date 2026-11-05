@@ -140,6 +140,20 @@ async function verifiedUser(request, env) {
   }
 }
 
+const mapActor = (r) => ({
+  id: r.id,
+  fullName: r.full_name || "",
+  jobTitle: r.job_title || "",
+  company: r.company || "",
+  companyRole: r.company_role || "",
+  projectIds: j(r.project_ids, []),
+  decisionRole: r.decision_role || "",
+  email: r.email || undefined,
+  emailStatus: r.email_status || undefined,
+  phone: r.phone || undefined,
+  linkedinUrl: r.linkedin_url || undefined,
+});
+
 var worker_default = {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -245,6 +259,15 @@ var worker_default = {
       try {
         const { results } = await env.DB.prepare("SELECT * FROM opportunities ORDER BY detection_date DESC").all();
         return json(results.map(mapOpportunity));
+      } catch (err) {
+        return json({ error: err.message }, 500);
+      }
+    }
+
+    if (url.pathname === "/api/actors") {
+      try {
+        const { results } = await env.DB.prepare("SELECT * FROM actors ORDER BY company, full_name").all();
+        return json(results.map(mapActor));
       } catch (err) {
         return json({ error: err.message }, 500);
       }

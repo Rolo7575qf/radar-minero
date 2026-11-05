@@ -28,6 +28,9 @@ export interface CompanyKeyContact {
   role: string;
   department: string;
   linkedinOrProfile?: string;
+  email?: string;
+  emailStatus?: 'verificado' | 'aceptado_sin_verificar' | 'no_verificado';
+  phone?: string;
   influenceLevel: 'Decisor Clave' | 'Evaluador Técnico' | 'Gestor Contratos' | 'Consultor Clave';
 }
 
@@ -58,4 +61,19 @@ export interface EcosystemRelation {
   relationType: 'titular' | 'epcm' | 'contratista' | 'consultora_ambiental' | 'socio' | 'proveedor';
   label: string;
   details?: string;
+}
+
+/** Actor clave tal como lo entrega /api/actors (tabla actors de D1). */
+export interface Actor {
+  id: string;
+  fullName: string;
+  jobTitle: string;
+  company: string;
+  companyRole: string;
+  projectIds: string[];
+  decisionRole: string;
+  email?: string;
+  emailStatus?: 'verificado' | 'aceptado_sin_verificar' | 'no_verificado';
+  phone?: string;
+  linkedinUrl?: string;
 }

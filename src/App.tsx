@@ -24,7 +24,7 @@ import { detectCategories } from './data/serviceCatalog';
 
 import { MiningProject } from './types/project';
 import { EarlySignal } from './types/signal';
-import { MiningCompany } from './types/company';
+import { MiningCompany, Actor } from './types/company';
 import { CommercialOpportunity, CommercialStatus, ScoringWeights } from './types/opportunity';
 import { DashboardConfig } from './types/dashboard';
 
@@ -101,7 +101,8 @@ export const App: React.FC = () => {
     const [y, m, day] = d.split('-');
     return day && m ? `${day}-${m}` : d;
   }, [signals]);
-  const { companies, relations } = useMemo(() => buildEcosystem(projects, opportunities), [projects, opportunities]);
+  const [actors, setActors] = useState<Actor[]>([]);
+  const { companies, relations } = useMemo(() => buildEcosystem(projects, opportunities, actors), [projects, opportunities, actors]);
   const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
   const [activeDashboardId, setActiveDashboardId] = useState<string>('');
   const [scoringWeights, setScoringWeights] = useState<ScoringWeights>(storageService.getScoringWeights());
@@ -146,6 +147,7 @@ export const App: React.FC = () => {
 
     // Sincronización en segundo plano con Cloudflare D1 (si está desplegado en Cloudflare)
     (async () => {
+      storageService.fetchActors().then(setActors);
       const synced = await storageService.syncWithCloudflareD1();
       let projs = storageService.getProjects();
       let sigs = storageService.getSignals();

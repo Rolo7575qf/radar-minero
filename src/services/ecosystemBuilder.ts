@@ -2,7 +2,7 @@
 // (proyectos + oportunidades de D1). No usa datos de ejemplo.
 import { MiningProject } from '../types/project';
 import { CommercialOpportunity } from '../types/opportunity';
-import { MiningCompany, EcosystemRelation, CompanyRole } from '../types/company';
+import { MiningCompany, EcosystemRelation, CompanyRole, Actor, CompanyKeyContact } from '../types/company';
 
 const slug = (s: string) =>
   s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -17,7 +17,8 @@ const mapRole = (raw: string): { role: CompanyRole; relation: EcosystemRelation[
 
 export function buildEcosystem(
   projects: MiningProject[],
-  opportunities: CommercialOpportunity[]
+  opportunities: CommercialOpportunity[],
+  actors: Actor[] = []
 ): { companies: MiningCompany[]; relations: EcosystemRelation[] } {
   const companies = new Map<string, MiningCompany>();
   const relations: EcosystemRelation[] = [];
@@ -79,5 +80,38 @@ export function buildEcosystem(
       add(p.epcmCompany, 'EPCM', p, 'epcm', 'EPCM');
     }
   }
-  return { companies: [...companies.values()], relations };
+
+  // Actores clave: se asignan a la empresa titular del proyecto (o a la que coincida por nombre).
+  const INFLUENCE: Record<string, CompanyKeyContact['influenceLevel']> = {
+    decisor: 'Decisor Clave',
+    compras: 'Gestor Contratos',
+    tecnico: 'Evaluador Técnico',
+    influenciador: 'Evaluador Técnico',
+  };
+  const tokens = (n: string) =>
+    slug(n).split('-').filter((t) => t.length > 2 && !['chile', 'division', 'compania', 'minera', 'scm', 'spa', 'sa', 'del', 'los', 'las'].includes(t));
+  const all = [...companies.values()];
+  for (const a of actors) {
+    const aTokens = tokens(a.company);
+    const byProject = all.filter(
+      (c) => c.supportedRoles.includes('Titular Minero') && a.projectIds.some((pid) => c.relatedProjectIds.includes(pid))
+    );
+    const nameMatch = (c: MiningCompany) => tokens(c.name).some((t) => aTokens.includes(t));
+    let targets = byProject.filter(nameMatch);
+    if (!targets.length) targets = byProject.length ? byProject : all.filter(nameMatch);
+    const contact: CompanyKeyContact = {
+      name: a.fullName,
+      role: a.jobTitle || 'Cargo no informado',
+      department: a.company,
+      linkedinOrProfile: a.linkedinUrl,
+      email: a.email,
+      emailStatus: a.emailStatus,
+      phone: a.phone,
+      influenceLevel: INFLUENCE[a.decisionRole] || 'Evaluador Técnico',
+    };
+    for (const c of targets.slice(0, 1)) {
+      if (!c.keyContacts.some((k) => k.name === contact.name)) c.keyContacts.push(contact);
+    }
+  }
+  return { companies: all, relations };
 }
