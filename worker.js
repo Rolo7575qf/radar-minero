@@ -216,7 +216,7 @@ var worker_default = {
             name: r.name,
             country: r.country || "Chile",
             region: r.region || "",
-            locationDetails: (r.region ? "Región: " + r.region : "") + " (ubicación referencial)",
+            locationDetails: (r.region ? "Región: " + r.region : "") + (r.latitude == null ? " (ubicación referencial por región)" : ""),
             latitude: r.latitude ?? c[0],
             longitude: r.longitude ?? c[1],
             ownerCompany: r.owner || "",

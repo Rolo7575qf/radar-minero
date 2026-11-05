@@ -12,6 +12,7 @@ import { SignalDetailModal } from './components/signals/SignalDetailModal';
 import { SignalSimulatorModal } from './components/signals/SignalSimulatorModal';
 import { ProjectList } from './components/projects/ProjectList';
 import { ProjectTimeline } from './components/projects/ProjectTimeline';
+import { ProjectMap } from './components/projects/ProjectMap';
 import { ProjectDetailModal } from './components/projects/ProjectDetailModal';
 import { EcosystemNetwork } from './components/ecosystem/EcosystemNetwork';
 import { CompanyList } from './components/ecosystem/CompanyList';
@@ -74,7 +75,7 @@ const recalcOpportunities = (
 export const App: React.FC = () => {
   // Navigation & Filtering State
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
-  const [projectsView, setProjectsView] = useState<'lista' | 'linea'>('lista');
+  const [projectsView, setProjectsView] = useState<'lista' | 'linea' | 'mapa'>('lista');
   const [selectedCountry, setSelectedCountry] = useState<string>('Chile');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -489,7 +490,7 @@ export const App: React.FC = () => {
             (() => {
               const viewToggle = (
                 <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-slate-900 border border-slate-800">
-                  {([['lista', 'Cartera'], ['linea', 'Línea de tiempo']] as const).map(([id, label]) => (
+                  {([['lista', 'Cartera'], ['mapa', 'Mapa'], ['linea', 'Línea de tiempo']] as const).map(([id, label]) => (
                     <button
                       key={id}
                       onClick={() => setProjectsView(id)}
@@ -507,6 +508,12 @@ export const App: React.FC = () => {
                   projects={filteredProjectsByCountry}
                   onSelectProject={setSelectedProject}
                   selectedCountry={selectedCountry}
+                  viewToggle={viewToggle}
+                />
+              ) : projectsView === 'mapa' ? (
+                <ProjectMap
+                  projects={filteredProjectsByCountry}
+                  onSelectProject={setSelectedProject}
                   viewToggle={viewToggle}
                 />
               ) : (
