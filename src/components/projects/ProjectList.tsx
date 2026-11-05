@@ -2,6 +2,7 @@ import React, { useState, ReactNode } from 'react';
 import { MiningProject, MineralType, MiningStage } from '../../types/project';
 import { Badge } from '../common/Badge';
 import { SectionHeader } from '../common/SectionHeader';
+import { RUBROS, RUBRO_LABEL, MAX_RUBROS, inferRubros, loadRubros, saveRubros } from '../../services/rubros';
 import {
   Pickaxe,
   Search,
@@ -32,6 +33,15 @@ export const ProjectList: React.FC<ProjectListProps> = ({
   const [selectedMineral, setSelectedMineral] = useState<string>('Todos');
   const [selectedStage, setSelectedStage] = useState<string>('Todas');
   const [selectedType, setSelectedType] = useState<string>('Todos');
+  const [myRubros, setMyRubros] = useState<string[]>(() => loadRubros());
+
+  const toggleRubro = (id: string) => {
+    setMyRubros((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < MAX_RUBROS ? [...prev, id] : prev;
+      saveRubros(next);
+      return next;
+    });
+  };
 
   const MINERALS = ['Todos', 'Cobre', 'Litio', 'Oro', 'Molibdeno', 'Hierro'];
   const TYPES = ['Todos', 'EIA', 'DIA'];
@@ -47,7 +57,9 @@ export const ProjectList: React.FC<ProjectListProps> = ({
       p.region.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.epcmCompany && p.epcmCompany.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    return matchesCountry && matchesMineral && matchesStage && matchesType && matchesSearch;
+    const matchesRubro = myRubros.length === 0 || inferRubros(p).some((r) => myRubros.includes(r));
+
+    return matchesCountry && matchesMineral && matchesStage && matchesType && matchesSearch && matchesRubro;
   });
 
   const totalCapex = filteredProjects.reduce(
@@ -113,6 +125,43 @@ export const ProjectList: React.FC<ProjectListProps> = ({
             </select>
           </div>
         </div>
+
+        {/* Para mi rubro */}
+        <div className="pt-3 border-t border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span className="ic-eyebrow text-[10px] text-amber-400">Para mi rubro</span>
+            <span className="text-[10px] text-slate-500">
+              Elija hasta {MAX_RUBROS}. Las etiquetas son hipótesis según etapa y tipo de proyecto, no datos del titular.
+              {myRubros.length > 0 && (
+                <button
+                  onClick={() => { setMyRubros([]); saveRubros([]); }}
+                  className="ml-2 text-amber-400 hover:underline"
+                >
+                  Limpiar
+                </button>
+              )}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {RUBROS.map((r) => {
+              const on = myRubros.includes(r.id);
+              return (
+                <button
+                  key={r.id}
+                  onClick={() => toggleRubro(r.id)}
+                  title={r.momento}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                    on
+                      ? 'bg-amber-400 text-slate-950 border-amber-400'
+                      : 'bg-slate-950 text-slate-300 border-slate-700 hover:border-amber-400/70'
+                  }`}
+                >
+                  {r.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Grid of Projects */}
@@ -141,6 +190,19 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 <Building2 className="w-3.5 h-3.5 text-amber-400 shrink-0" strokeWidth={1.5} />
                 <span className="truncate">{p.ownerCompany}</span>
               </div>
+
+              {/* Rubros que calzan (hipótesis) */}
+              {myRubros.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {inferRubros(p)
+                    .filter((r) => myRubros.includes(r))
+                    .map((r) => (
+                      <span key={r} className="text-[9px] px-1.5 py-0.5 rounded border border-amber-400/50 text-amber-300">
+                        {RUBRO_LABEL[r]}
+                      </span>
+                    ))}
+                </div>
+              )}
 
               {/* Etapa */}
               <div className="mt-4 rounded-[10px] bg-slate-950 border border-slate-800 px-3 py-2.5">
