@@ -59,12 +59,13 @@ export const MetricWidget: React.FC<MetricWidgetProps> = ({
     subtitle = 'Cartera activa';
   }
 
+  // Iconografía IC: línea fina amarilla, sin rellenos
   const iconColors = {
-    amber: 'text-amber-400 bg-amber-500/10',
-    cyan: 'text-cyan-400 bg-cyan-500/10',
-    emerald: 'text-emerald-400 bg-emerald-500/10',
-    rose: 'text-rose-400 bg-rose-500/10',
-    indigo: 'text-indigo-400 bg-indigo-500/10',
+    amber: 'text-amber-400 border border-amber-400/40',
+    cyan: 'text-amber-400 border border-amber-400/40',
+    emerald: 'text-amber-400 border border-amber-400/40',
+    rose: 'text-rose-400 border border-rose-400/40',
+    indigo: 'text-amber-400 border border-amber-400/40',
   };
 
   const scheme = widget.colorScheme || 'amber';
@@ -73,7 +74,7 @@ export const MetricWidget: React.FC<MetricWidgetProps> = ({
     <div className="flex items-center justify-between">
       <div>
         <div className="flex items-baseline gap-3">
-          <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-mono">
+          <span className="ic-display text-[40px] sm:text-[48px] text-amber-400 leading-none">
             {displayValue}
           </span>
           {chipText && (
@@ -82,12 +83,12 @@ export const MetricWidget: React.FC<MetricWidgetProps> = ({
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-400 mt-2 font-medium">
+        <p className="text-xs text-slate-500 mt-3">
           {subtitle}
         </p>
       </div>
-      <div className={`p-3.5 rounded-2xl ${iconColors[scheme]}`}>
-        <Icon className="w-6 h-6" />
+      <div className={`p-3 rounded-[10px] ${iconColors[scheme]}`}>
+        <Icon className="w-6 h-6" strokeWidth={1.5} />
       </div>
     </div>
   );

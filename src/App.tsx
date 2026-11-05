@@ -4,7 +4,7 @@ import { Sidebar, ActiveTab, MobileNav, SECTION_TITLES } from './components/layo
 import { AccessCurtain } from './components/brand/AccessCurtain';
 import { AccountModal } from './components/account/AccountModal';
 import { ClientBrand, ClientLogo } from './components/brand/ICSeal';
-import { ArrowRight, Briefcase, ImagePlus } from 'lucide-react';
+import { ArrowRight, Briefcase } from 'lucide-react';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { DashboardBuilderModal } from './components/dashboard/DashboardBuilderModal';
 import { SignalFeed } from './components/signals/SignalFeed';
@@ -366,7 +366,7 @@ export const App: React.FC = () => {
     dashboards.find((d) => d.id === activeDashboardId) || dashboards[0];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans">
+    <div className="min-h-screen bg-slate-950 text-slate-300 flex font-sans">
       <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -400,7 +400,9 @@ export const App: React.FC = () => {
         {/* Content View Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           {activeTab === 'dashboard' && (
-            <section className="relative mb-8 rounded-[16px] border border-slate-800 bg-[#050505] ic-dot-grid overflow-hidden">
+            <section className="relative mb-8 rounded-[16px] border border-slate-800 bg-slate-900 ic-dot-grid overflow-hidden">
+              <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-400" />
+              <div className="pointer-events-none absolute -right-24 -top-24 w-80 h-80 rounded-full" style={{ background: 'radial-gradient(circle, rgba(245,197,24,0.14), transparent 65%)' }} />
               <div className="relative p-6 lg:p-8 flex flex-col lg:flex-row lg:items-end gap-6 justify-between">
                 <div className="max-w-2xl">
                   <div className="flex items-center gap-2">
@@ -410,10 +412,9 @@ export const App: React.FC = () => {
                   <h2 className="ic-display text-white text-[30px] sm:text-[40px] mt-3">
                     Mercado minero en seguimiento<span className="text-amber-400">.</span>
                   </h2>
-                  <p className="mt-3 text-sm text-slate-300 leading-relaxed">
-                    {filteredProjectsByCountry.length} proyectos con huellas públicas, US$
-                    {(filteredProjectsByCountry.reduce((t, p) => t + (p.capexEstimatedMillionsUSD || 0), 0) / 1000).toLocaleString('es-CL', { maximumFractionDigits: 1 })} mil millones en inversión declarada y{' '}
-                    {filteredOpportunitiesByCountry.filter((o) => o.priority === 'Máxima' || o.priority === 'Alta').length} oportunidades de prioridad alta para su empresa.
+                  <p className="mt-3 text-sm text-slate-400 leading-relaxed max-w-xl">
+                    Cada proyecto minero con huellas públicas, su inversión declarada y las oportunidades que más le convienen a su empresa.{' '}
+                    <span className="text-white font-bold">Se actualiza cada día.</span>
                   </p>
                   <div className="mt-5 flex flex-wrap gap-2">
                     <button onClick={() => setActiveTab('opportunities')} className="flex items-center gap-2 px-4 py-2.5 rounded-[6px] bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-bold tracking-[0.12em]">
@@ -422,11 +423,6 @@ export const App: React.FC = () => {
                     {providerServices.length === 0 && (
                       <button onClick={() => setIsProfileOpen(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-[6px] border border-amber-400/60 text-amber-400 hover:bg-amber-400/10 text-[11px] font-bold tracking-[0.12em]">
                         <Briefcase className="w-3.5 h-3.5" strokeWidth={1.5} /> DEFINIR MI PERFIL DE PROVEEDOR
-                      </button>
-                    )}
-                    {!clientBrand.logo && (
-                      <button onClick={() => setIsAccountOpen(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-[6px] border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 text-[11px] font-bold tracking-[0.12em]">
-                        <ImagePlus className="w-3.5 h-3.5" strokeWidth={1.5} /> AGREGAR MI LOGO
                       </button>
                     )}
                   </div>

@@ -12,15 +12,15 @@
 
   /* Neutros IC (reemplazan slate) */
   --color-slate-50: #faf8f2;
-  --color-slate-100: #f2f2f0;
-  --color-slate-200: #e4e4e2;
-  --color-slate-300: #c9c9c9;
-  --color-slate-400: #a3a3a3;
-  --color-slate-500: #8a8a8a;
-  --color-slate-600: #5e5e5e;
-  --color-slate-700: #3a3a3a;
-  --color-slate-800: #262626;
-  --color-slate-900: #141414;
+  --color-slate-100: #f4f4f2;
+  --color-slate-200: #dcdcda;
+  --color-slate-300: #b8b8b8;
+  --color-slate-400: #8f8f8f;
+  --color-slate-500: #707070;
+  --color-slate-600: #555555;
+  --color-slate-700: #3d3d3d;
+  --color-slate-800: #2c2c2c;
+  --color-slate-900: #171717;
   --color-slate-950: #0a0a0a;
 
   /* Amarillo marca (reemplaza amber, orange y yellow) */
@@ -83,7 +83,7 @@
 @layer base {
   html, body {
     background-color: #0a0a0a;
-    color: #f2f2f0;
+    color: #b8b8b8;
     font-family: var(--font-sans);
     margin: 0;
     padding: 0;
@@ -119,6 +119,26 @@
     background-size: 22px 22px;
   }
   .ic-rule { width: 32px; height: 2px; background: #f5c518; display: inline-block; }
+}
+
+/* ---------- Profundidad: superficies elevadas con sombra ---------- */
+/* Tarjetas (fondo slate-900 redondeado) se separan del fondo con sombra y un filo de luz superior */
+[class*="bg-slate-900"][class*="rounded-2xl"],
+[class*="bg-slate-900"][class*="rounded-xl"][class*="border"],
+[class*="bg-slate-900"][class*="rounded-[10px]"],
+[class*="bg-slate-900"][class*="rounded-[16px]"] {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 14px 32px -14px rgba(0, 0, 0, 0.9);
+}
+/* Pozos internos (fondo negro dentro de una tarjeta) se hunden */
+[class*="bg-slate-900"] [class*="bg-slate-950"][class*="rounded"] {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+/* Titulares en blanco pleno por defecto; el cuerpo queda en gris para jerarquía */
+@layer base {
+  h1, h2, h3, h4 { color: #ffffff; }
 }
 
 /* Scrollbars sobrias */

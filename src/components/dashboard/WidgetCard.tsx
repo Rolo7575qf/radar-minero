@@ -46,18 +46,19 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({
 
   return (
     <div
-      className={`bg-slate-900/90 backdrop-blur-md rounded-2xl border transition-all duration-200 flex flex-col overflow-hidden shadow-xl ${
+      className={`bg-slate-900 rounded-2xl border transition-all duration-200 flex flex-col overflow-hidden ${
         widthClasses[widget.width]
       } ${borderColors[scheme]}`}
     >
       {/* Widget Header */}
-      <div className="px-5 py-3.5 border-b border-slate-800/80 flex items-center justify-between gap-3 bg-slate-950/40">
+      <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between gap-3 bg-gradient-to-b from-white/[0.035] to-transparent">
         <div className="min-w-0">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-200 truncate">
+          <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white truncate">
+            <span className="w-1.5 h-1.5 bg-amber-400 shrink-0" />
             {widget.title}
           </h3>
           {widget.customDescription && (
-            <p className="text-[11px] text-slate-400 truncate mt-0.5">
+            <p className="text-[11px] text-slate-500 truncate mt-1 pl-3.5">
               {widget.customDescription}
             </p>
           )}
