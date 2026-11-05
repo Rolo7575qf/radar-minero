@@ -15,6 +15,7 @@ export interface WorkspaceState {
   scoringWeights?: ScoringWeights;
   dashboards?: DashboardConfig[];
   activeDashboardId?: string;
+  followedProjects?: string[]; // ids de proyectos que sigue el usuario
   providerServices?: string[]; // perfil de proveedor: ids de servicios que ofrece
   clientBrand?: { name?: string; logo?: string }; // identidad del cliente (logo redimensionado)
 }

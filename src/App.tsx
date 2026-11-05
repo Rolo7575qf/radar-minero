@@ -21,7 +21,8 @@ import { OpportunityBoard } from './components/opportunities/OpportunityBoard';
 import { OpportunityDetailModal } from './components/opportunities/OpportunityDetailModal';
 import { ScoringConfigModal } from './components/opportunities/ScoringConfigModal';
 import { ProviderProfileModal } from './components/opportunities/ProviderProfileModal';
-import { detectCategories } from './data/serviceCatalog';
+import { detectCategories, serviceLabel } from './data/serviceCatalog';
+import { AssistantPanel } from './components/assistant/AssistantPanel';
 
 import { MiningProject } from './types/project';
 import { EarlySignal } from './types/signal';
@@ -108,7 +109,10 @@ export const App: React.FC = () => {
   const [activeDashboardId, setActiveDashboardId] = useState<string>('');
   const [scoringWeights, setScoringWeights] = useState<ScoringWeights>(storageService.getScoringWeights());
   const [providerServices, setProviderServices] = useState<string[]>([]);
+  const [followedProjects, setFollowedProjects] = useState<string[]>([]);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [briefProject, setBriefProject] = useState<MiningProject | null>(null);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [clientBrand, setClientBrand] = useState<ClientBrand>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -177,6 +181,7 @@ export const App: React.FC = () => {
           setScoringWeights(ws.scoringWeights);
         }
         if (ws.providerServices) setProviderServices(ws.providerServices);
+        if (ws.followedProjects) setFollowedProjects(ws.followedProjects);
         if (ws.clientBrand) setClientBrand(ws.clientBrand);
       }
       // Siempre se recalcula en el cliente: así el puntaje usa las ponderaciones y el perfil de cada usuario
@@ -364,6 +369,15 @@ export const App: React.FC = () => {
     setOpportunities(recalcOpportunities(rawOpportunities, projects, signals, scoringWeights, services));
   };
 
+  // Seguir / dejar de seguir un proyecto (se guarda por usuario)
+  const handleToggleFollow = (id: string) => {
+    setFollowedProjects((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      workspaceService.queueSave({ followedProjects: next });
+      return next;
+    });
+  };
+
   // Cambio de etapa / nota de una oportunidad (se guarda por usuario en D1)
   const handleUpdateOpportunity = (id: string, patch: { status?: CommercialStatus; note?: string }) => {
     const next = {
@@ -509,6 +523,10 @@ export const App: React.FC = () => {
                   onSelectProject={setSelectedProject}
                   selectedCountry={selectedCountry}
                   viewToggle={viewToggle}
+                  providerServices={providerServices}
+                  onOpenProfile={() => setIsProfileOpen(true)}
+                  followedIds={followedProjects}
+                  onToggleFollow={handleToggleFollow}
                 />
               ) : projectsView === 'mapa' ? (
                 <ProjectMap
@@ -711,10 +729,35 @@ export const App: React.FC = () => {
         />
       )}
 
+      <button
+        onClick={() => {
+          setBriefProject(null);
+          setAssistantOpen(true);
+        }}
+        className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-amber-400 text-slate-950 text-xs font-bold shadow-xl hover:bg-amber-300 transition"
+        aria-label="Abrir asistente de IA"
+      >
+        <span aria-hidden>✦</span> Asistente IA
+      </button>
+
+      <AssistantPanel
+        isOpen={assistantOpen}
+        onClose={() => {
+          setAssistantOpen(false);
+          setBriefProject(null);
+        }}
+        briefProject={briefProject}
+        providerServiceLabels={providerServices.map(serviceLabel)}
+      />
+
       {selectedProject && (
         <ProjectDetailModal
           project={selectedProject}
           onClose={() => setSelectedProject(null)}
+          onGenerateBrief={(p) => {
+            setBriefProject(p);
+            setAssistantOpen(true);
+          }}
           onSelectCompanyByName={(name) => {
             const c = companies.find((item) => item.name === name);
             if (c) {

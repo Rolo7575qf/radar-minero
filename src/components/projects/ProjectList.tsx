@@ -2,7 +2,7 @@ import React, { useState, ReactNode } from 'react';
 import { MiningProject, MineralType, MiningStage } from '../../types/project';
 import { Badge } from '../common/Badge';
 import { SectionHeader } from '../common/SectionHeader';
-import { RUBROS, RUBRO_LABEL, MAX_RUBROS, inferRubros, loadRubros, saveRubros } from '../../services/rubros';
+import { detectCategories, serviceLabel } from '../../data/serviceCatalog';
 import {
   Pickaxe,
   Search,
@@ -13,7 +13,9 @@ import {
   ChevronRight,
   TrendingUp,
   MapPin,
-  Clock
+  Clock,
+  Star,
+  Bell
 } from 'lucide-react';
 
 interface ProjectListProps {
@@ -21,6 +23,10 @@ interface ProjectListProps {
   onSelectProject: (project: MiningProject) => void;
   selectedCountry: string;
   viewToggle?: ReactNode;
+  providerServices: string[];
+  onOpenProfile: () => void;
+  followedIds: string[];
+  onToggleFollow: (id: string) => void;
 }
 
 export const ProjectList: React.FC<ProjectListProps> = ({
@@ -28,20 +34,23 @@ export const ProjectList: React.FC<ProjectListProps> = ({
   onSelectProject,
   selectedCountry,
   viewToggle,
+  providerServices,
+  onOpenProfile,
+  followedIds,
+  onToggleFollow,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMineral, setSelectedMineral] = useState<string>('Todos');
   const [selectedStage, setSelectedStage] = useState<string>('Todas');
   const [selectedType, setSelectedType] = useState<string>('Todos');
-  const [myRubros, setMyRubros] = useState<string[]>(() => loadRubros());
+  const [onlyMyRubro, setOnlyMyRubro] = useState(false);
+  const [onlyFollowed, setOnlyFollowed] = useState(false);
 
-  const toggleRubro = (id: string) => {
-    setMyRubros((prev) => {
-      const next = prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < MAX_RUBROS ? [...prev, id] : prev;
-      saveRubros(next);
-      return next;
-    });
-  };
+  // Servicios que el proyecto probablemente demanda (hipótesis por palabras clave del texto público)
+  const projectText = (p: MiningProject) =>
+    [p.name, p.productiveCapacity || '', ...(p.history || []).slice(0, 8).map((h) => `${h.signalTitle} ${h.changeDescription}`)].join(' ');
+  const projectNeeds = (p: MiningProject) => detectCategories(projectText(p));
+  const matchedServices = (p: MiningProject) => projectNeeds(p).filter((c) => providerServices.includes(c));
 
   const MINERALS = ['Todos', 'Cobre', 'Litio', 'Oro', 'Molibdeno', 'Hierro'];
   const TYPES = ['Todos', 'EIA', 'DIA'];
@@ -57,9 +66,10 @@ export const ProjectList: React.FC<ProjectListProps> = ({
       p.region.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.epcmCompany && p.epcmCompany.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesRubro = myRubros.length === 0 || inferRubros(p).some((r) => myRubros.includes(r));
+    const matchesRubro = !onlyMyRubro || providerServices.length === 0 || matchedServices(p).length > 0;
+    const matchesFollow = !onlyFollowed || followedIds.includes(p.id);
 
-    return matchesCountry && matchesMineral && matchesStage && matchesType && matchesSearch && matchesRubro;
+    return matchesCountry && matchesMineral && matchesStage && matchesType && matchesSearch && matchesRubro && matchesFollow;
   });
 
   const totalCapex = filteredProjects.reduce(
@@ -126,43 +136,69 @@ export const ProjectList: React.FC<ProjectListProps> = ({
           </div>
         </div>
 
-        {/* Para mi rubro */}
-        <div className="pt-3 border-t border-slate-800">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <span className="ic-eyebrow text-[10px] text-amber-400">Para mi rubro</span>
-            <span className="text-[10px] text-slate-500">
-              Elija hasta {MAX_RUBROS}. Las etiquetas son hipótesis según etapa y tipo de proyecto, no datos del titular.
-              {myRubros.length > 0 && (
-                <button
-                  onClick={() => { setMyRubros([]); saveRubros([]); }}
-                  className="ml-2 text-amber-400 hover:underline"
-                >
-                  Limpiar
-                </button>
-              )}
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {RUBROS.map((r) => {
-              const on = myRubros.includes(r.id);
-              return (
-                <button
-                  key={r.id}
-                  onClick={() => toggleRubro(r.id)}
-                  title={r.momento}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
-                    on
-                      ? 'bg-amber-400 text-slate-950 border-amber-400'
-                      : 'bg-slate-950 text-slate-300 border-slate-700 hover:border-amber-400/70'
-                  }`}
-                >
-                  {r.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Mi rubro y seguimiento */}
+        <div className="pt-3 border-t border-slate-800 flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => (providerServices.length === 0 ? onOpenProfile() : setOnlyMyRubro((v) => !v))}
+            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition ${
+              onlyMyRubro && providerServices.length > 0
+                ? 'bg-amber-400 text-slate-950 border-amber-400'
+                : 'bg-slate-950 text-slate-300 border-slate-700 hover:border-amber-400/70'
+            }`}
+            title={
+              providerServices.length
+                ? 'Muestra solo proyectos que probablemente demandan: ' + providerServices.map(serviceLabel).join(', ')
+                : 'Defina primero los servicios que ofrece'
+            }
+          >
+            {providerServices.length === 0 ? 'Definir mi rubro' : 'Para mi rubro'}
+          </button>
+          <button
+            onClick={() => setOnlyFollowed((v) => !v)}
+            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition flex items-center gap-1 ${
+              onlyFollowed ? 'bg-amber-400 text-slate-950 border-amber-400' : 'bg-slate-950 text-slate-300 border-slate-700 hover:border-amber-400/70'
+            }`}
+          >
+            <Star className="w-3 h-3" /> Siguiendo ({followedIds.length})
+          </button>
+          <span className="text-[10px] text-slate-500">
+            {providerServices.length > 0
+              ? 'Su rubro: ' + providerServices.map(serviceLabel).join(' · ') + '. Las coincidencias son hipótesis según el texto público, no datos del titular.'
+              : 'Sin rubro definido, no se puede filtrar por relevancia.'}
+          </span>
         </div>
       </div>
+
+      {/* Novedades de lo que sigue */}
+      {followedIds.length > 0 && (() => {
+        const since = Date.now() - 30 * 24 * 3600 * 1000;
+        const news = projects
+          .filter((p) => followedIds.includes(p.id))
+          .flatMap((p) => (p.history || []).map((h) => ({ p, h, t: new Date(h.date.length === 10 ? h.date + 'T00:00:00' : h.date).getTime() })))
+          .filter((x) => !isNaN(x.t) && x.t >= since)
+          .sort((a, b) => b.t - a.t)
+          .slice(0, 6);
+        return (
+          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+            <div className="flex items-center gap-2 mb-2 text-[11px] font-semibold text-amber-400">
+              <Bell className="w-3.5 h-3.5" /> Novedades de lo que sigue (últimos 30 días)
+            </div>
+            {news.length === 0 ? (
+              <p className="text-xs text-slate-500">Sin hitos nuevos en los proyectos que sigue en los últimos 30 días.</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {news.map(({ p, h }) => (
+                  <li key={h.id}>
+                    <button onClick={() => onSelectProject(p)} className="text-left text-xs text-slate-300 hover:text-white">
+                      <span className="ic-mono text-slate-500">{h.date}</span> · <strong>{p.name}</strong>: {h.signalTitle}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Grid of Projects */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -180,6 +216,13 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                   <span className="ic-mono text-[10px] font-bold px-2 py-0.5 rounded-[4px] border border-slate-700 text-white">{p.submissionType}</span>
                 )}
                 <span className="ic-mono text-[10px] text-slate-500 ml-auto">{p.region}</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onToggleFollow(p.id); }}
+                  title={followedIds.includes(p.id) ? 'Dejar de seguir' : 'Seguir proyecto'}
+                  className="p-1 rounded hover:bg-slate-800"
+                >
+                  <Star className={`w-4 h-4 ${followedIds.includes(p.id) ? 'fill-amber-400 text-amber-400' : 'text-slate-500'}`} />
+                </button>
               </div>
 
               {/* Nombre y titular */}
@@ -191,16 +234,14 @@ export const ProjectList: React.FC<ProjectListProps> = ({
                 <span className="truncate">{p.ownerCompany}</span>
               </div>
 
-              {/* Rubros que calzan (hipótesis) */}
-              {myRubros.length > 0 && (
+              {/* Servicios de su rubro que calzan (hipótesis) */}
+              {providerServices.length > 0 && matchedServices(p).length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1">
-                  {inferRubros(p)
-                    .filter((r) => myRubros.includes(r))
-                    .map((r) => (
-                      <span key={r} className="text-[9px] px-1.5 py-0.5 rounded border border-amber-400/50 text-amber-300">
-                        {RUBRO_LABEL[r]}
-                      </span>
-                    ))}
+                  {matchedServices(p).map((r) => (
+                    <span key={r} className="text-[9px] px-1.5 py-0.5 rounded border border-amber-400/50 text-amber-300">
+                      {serviceLabel(r)}
+                    </span>
+                  ))}
                 </div>
               )}
 

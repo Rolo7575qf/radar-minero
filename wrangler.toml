@@ -15,6 +15,10 @@ directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
+# Asistente de IA (Workers AI, sin clave). Si se define el secreto ANTHROPIC_API_KEY, se usa Claude en su lugar.
+[ai]
+binding = "AI"
+
 # Vinculación de Base de Datos Cloudflare D1
 [[d1_databases]]
 binding = "DB"

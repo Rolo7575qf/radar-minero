@@ -13,19 +13,22 @@ import {
   Clock,
   ShieldCheck,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from 'lucide-react';
 
 interface ProjectDetailModalProps {
   project: MiningProject | null;
   onClose: () => void;
   onSelectCompanyByName?: (name: string) => void;
+  onGenerateBrief?: (project: MiningProject) => void;
 }
 
 export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   project,
   onClose,
   onSelectCompanyByName,
+  onGenerateBrief,
 }) => {
   if (!project) return null;
 
@@ -265,12 +268,22 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           <span className="text-xs text-slate-500">
             Última actualización sincronizada: {project.lastUpdateDate}
           </span>
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
-          >
-            Cerrar Ficha
-          </button>
+          <div className="flex items-center gap-2">
+            {onGenerateBrief && (
+              <button
+                onClick={() => onGenerateBrief(project)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 transition"
+              >
+                <Sparkles size={13} /> Brief comercial con IA
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="px-5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
+            >
+              Cerrar Ficha
+            </button>
+          </div>
         </div>
       </div>
     </div>
