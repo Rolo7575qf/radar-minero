@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, ReactNode } from 'react';
 import { MiningProject, MineralType, MiningStage } from '../../types/project';
 import { Badge } from '../common/Badge';
 import { SectionHeader } from '../common/SectionHeader';
@@ -19,12 +19,14 @@ interface ProjectListProps {
   projects: MiningProject[];
   onSelectProject: (project: MiningProject) => void;
   selectedCountry: string;
+  viewToggle?: ReactNode;
 }
 
 export const ProjectList: React.FC<ProjectListProps> = ({
   projects,
   onSelectProject,
   selectedCountry,
+  viewToggle,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMineral, setSelectedMineral] = useState<string>('Todos');
@@ -64,6 +66,8 @@ export const ProjectList: React.FC<ProjectListProps> = ({
           { value: (totalCapex / 1000).toLocaleString('es-CL', { maximumFractionDigits: 1 }), label: 'US$ mil MM' },
         ]}
       />
+
+      {viewToggle}
 
       {/* Filters Bar */}
       <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">

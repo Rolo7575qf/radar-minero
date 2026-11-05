@@ -484,34 +484,38 @@ export const App: React.FC = () => {
           )}
 
           {activeTab === 'projects' && (
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-slate-900 border border-slate-800">
-                {([['lista', 'Cartera'], ['linea', 'Línea de tiempo']] as const).map(([id, label]) => (
-                  <button
-                    key={id}
-                    onClick={() => setProjectsView(id)}
-                    className={`px-4 py-1.5 rounded-md text-xs font-semibold transition ${
-                      projectsView === id ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              {projectsView === 'lista' ? (
+            (() => {
+              const viewToggle = (
+                <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-slate-900 border border-slate-800">
+                  {([['lista', 'Cartera'], ['linea', 'Línea de tiempo']] as const).map(([id, label]) => (
+                    <button
+                      key={id}
+                      onClick={() => setProjectsView(id)}
+                      className={`px-4 py-1.5 rounded-md text-xs font-semibold transition ${
+                        projectsView === id ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              );
+              return projectsView === 'lista' ? (
                 <ProjectList
                   projects={filteredProjectsByCountry}
                   onSelectProject={setSelectedProject}
                   selectedCountry={selectedCountry}
+                  viewToggle={viewToggle}
                 />
               ) : (
                 <ProjectTimeline
                   projects={filteredProjectsByCountry}
                   opportunities={filteredOpportunitiesByCountry}
                   onSelectProject={setSelectedProject}
+                  viewToggle={viewToggle}
                 />
-              )}
-            </div>
+              );
+            })()
           )}
 
           {activeTab === 'ecosystem' && (

@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, ReactNode } from 'react';
+import { SectionHeader } from '../common/SectionHeader';
 import { MiningProject, ProjectHistoryEntry } from '../../types/project';
 import { CommercialOpportunity } from '../../types/opportunity';
 import { Clock, Diamond } from 'lucide-react';
@@ -7,6 +8,7 @@ interface ProjectTimelineProps {
   projects: MiningProject[];
   opportunities: CommercialOpportunity[];
   onSelectProject: (project: MiningProject) => void;
+  viewToggle?: ReactNode;
 }
 
 type Span = 36 | 60;
@@ -30,7 +32,7 @@ const fmt = (d: Date) => d.toLocaleDateString('es-CL', { day: '2-digit', month: 
  * Línea de tiempo de huellas: cada proyecto es una fila, cada hito del historial es un punto.
  * La ventana por defecto cubre 3 años hacia atrás y 18 meses hacia adelante (fecha objetivo de RFQ).
  */
-export const ProjectTimeline: React.FC<ProjectTimelineProps> = ({ projects, opportunities, onSelectProject }) => {
+export const ProjectTimeline: React.FC<ProjectTimelineProps> = ({ projects, opportunities, onSelectProject, viewToggle }) => {
   const [span, setSpan] = useState<Span>(36);
   const [active, setActive] = useState<{ project: MiningProject; entry: ProjectHistoryEntry } | null>(null);
 
@@ -81,8 +83,22 @@ export const ProjectTimeline: React.FC<ProjectTimelineProps> = ({ projects, oppo
 
   const todayLeft = pos(now);
 
+  const totalEvents = rows.reduce((t, r) => t + r.total, 0);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <SectionHeader
+        eyebrow="Huella a 3 años"
+        title="Línea de tiempo de proyectos"
+        description="Cada punto es un hito registrado con fuente y fecha: ingresos al SEIA, anuncios, aprobaciones y señales de foros."
+        stats={[
+          { value: rows.length, label: 'Proyectos con huella' },
+          { value: totalEvents, label: 'Hitos' },
+        ]}
+      />
+
+      {viewToggle}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs text-slate-400">
           <Clock className="w-4 h-4 text-cyan-400" />
