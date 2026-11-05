@@ -112,6 +112,15 @@ export const App: React.FC = () => {
     try { return sessionStorage.getItem('radar_curtain_seen') !== '1'; } catch { return true; }
   });
   const isAdmin = userEmail === 'roloquinonesf@gmail.com';
+  const [navCollapsed, setNavCollapsed] = useState<boolean>(() => {
+    try { return localStorage.getItem('radar_nav_collapsed') === '1'; } catch { return false; }
+  });
+  const toggleNav = () => {
+    setNavCollapsed((c) => {
+      try { localStorage.setItem('radar_nav_collapsed', c ? '0' : '1'); } catch { /* sin almacenamiento */ }
+      return !c;
+    });
+  };
 
   // Modal State
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
@@ -379,6 +388,8 @@ export const App: React.FC = () => {
         sources={sources}
         clientBrand={clientBrand}
         onOpenAccount={() => setIsAccountOpen(true)}
+        collapsed={navCollapsed}
+        onToggleCollapsed={toggleNav}
       />
 
       <div className="flex-1 min-w-0 flex flex-col">
