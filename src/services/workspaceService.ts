@@ -16,9 +16,11 @@ export interface WorkspaceState {
   dashboards?: DashboardConfig[];
   activeDashboardId?: string;
   providerServices?: string[]; // perfil de proveedor: ids de servicios que ofrece
+  clientBrand?: { name?: string; logo?: string }; // identidad del cliente (logo redimensionado)
 }
 
 let ready = false;
+let email: string | null = null;
 let pending: WorkspaceState = {};
 let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -45,11 +47,17 @@ export const workspaceService = {
       const res = await fetch('/api/workspace');
       if (!res.ok) return null;
       const data = await res.json();
+      if (data && data.email) email = data.email;
       if (!silent) ready = true;
       return (data && data.state) || {};
     } catch {
       return null;
     }
+  },
+
+  // Correo verificado por Cloudflare Access (null si no hay sesión)
+  getEmail(): string | null {
+    return email;
   },
 
   queueSave(partial: WorkspaceState): void {

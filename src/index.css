@@ -1,47 +1,159 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --bg-main: #0b0f19;
-    --bg-card: #111827;
-    --border-color: #1f2937;
-    --copper-accent: #e07a5f;
-    --copper-hover: #c96348;
-    --mining-amber: #f59e0b;
-    --radar-cyan: #06b6d4;
-  }
+/* ============================================================
+   Sistema de Diseño InteligenciaConectada™ aplicado al Radar Minero
+   Negro marca #0A0A0A · Amarillo marca #F5C518 · Blanco · Grises neutros
+   Se reasignan las paletas de Tailwind para que toda la plataforma herede la marca.
+   ============================================================ */
+@theme {
+  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-display: "Arial Black", "Archivo Black", "Helvetica Neue", Arial, sans-serif;
 
-  body {
-    background-color: #0b0f19;
-    color: #e2e8f0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  /* Neutros IC (reemplazan slate) */
+  --color-slate-50: #faf8f2;
+  --color-slate-100: #f2f2f0;
+  --color-slate-200: #e4e4e2;
+  --color-slate-300: #c9c9c9;
+  --color-slate-400: #a3a3a3;
+  --color-slate-500: #8a8a8a;
+  --color-slate-600: #5e5e5e;
+  --color-slate-700: #3a3a3a;
+  --color-slate-800: #262626;
+  --color-slate-900: #141414;
+  --color-slate-950: #0a0a0a;
+
+  /* Amarillo marca (reemplaza amber, orange y yellow) */
+  --color-amber-50: #fffbea;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fce59a;
+  --color-amber-300: #f9d85a;
+  --color-amber-400: #f5c518;
+  --color-amber-500: #f5c518;
+  --color-amber-600: #d9ac0b;
+  --color-amber-700: #a88407;
+  --color-amber-800: #6e5605;
+  --color-amber-900: #3d3004;
+  --color-amber-950: #241c02;
+  --color-orange-300: #f9d85a;
+  --color-orange-400: #f5c518;
+  --color-orange-500: #f5c518;
+  --color-orange-600: #d9ac0b;
+  --color-yellow-400: #f5c518;
+  --color-yellow-500: #f5c518;
+
+  /* Acentos secundarios atenuados a un gris acero (evita el arcoíris) */
+  --color-indigo-200: #d3dadf;
+  --color-indigo-300: #b4bec6;
+  --color-indigo-400: #94a1ab;
+  --color-indigo-500: #77848f;
+  --color-indigo-600: #5d6872;
+  --color-indigo-800: #2f363d;
+  --color-indigo-900: #1e2328;
+  --color-indigo-950: #121518;
+  --color-purple-200: #d3dadf;
+  --color-purple-300: #b4bec6;
+  --color-purple-400: #94a1ab;
+  --color-purple-500: #77848f;
+  --color-purple-600: #5d6872;
+  --color-purple-800: #2f363d;
+  --color-purple-900: #1e2328;
+  --color-purple-950: #121518;
+  --color-blue-300: #b4bec6;
+  --color-blue-400: #94a1ab;
+  --color-blue-500: #77848f;
+  --color-sky-300: #b4bec6;
+  --color-sky-400: #94a1ab;
+  --color-sky-800: #2f363d;
+  --color-sky-950: #121518;
+  --color-cyan-200: #d3dadf;
+  --color-cyan-300: #c3ccd3;
+  --color-cyan-400: #a9b5be;
+  --color-cyan-500: #8796a1;
+  --color-cyan-600: #5d6872;
+  --color-cyan-700: #46505a;
+  --color-cyan-800: #2f363d;
+  --color-cyan-900: #1e2328;
+  --color-cyan-950: #121518;
+
+  --radius-xl: 10px;
+  --radius-2xl: 16px;
+}
+
+@layer base {
+  html, body {
+    background-color: #0a0a0a;
+    color: #f2f2f0;
+    font-family: var(--font-sans);
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
   }
+  ::selection { background: #f5c518; color: #0a0a0a; }
+  button, select, input, textarea { font-family: inherit; }
 }
 
-/* Custom scrollbars for clean industrial SaaS UI */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #0f172a;
-}
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+/* ---------- Utilidades de marca ---------- */
+@layer components {
+  .ic-display {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.92;
+  }
+  .ic-eyebrow {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+  }
+  .ic-mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  .ic-dot::after { content: "."; color: #f5c518; }
+  .ic-dot-grid {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .ic-rule { width: 32px; height: 2px; background: #f5c518; display: inline-block; }
 }
 
+/* Scrollbars sobrias */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #2e2e2e; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #444444; }
+
+/* ---------- Animaciones ---------- */
 @keyframes pulseSlow {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.85; transform: scale(1.02); }
 }
+.pulse-radar { animation: pulseSlow 3s infinite ease-in-out; }
 
-.pulse-radar {
-  animation: pulseSlow 3s infinite ease-in-out;
+@keyframes icSweep { to { transform: rotate(360deg); } }
+.ic-sweep { animation: icSweep 7s linear infinite; transform-origin: 50% 50%; }
+
+@keyframes icPing {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+.ic-ping { animation: icPing 2.4s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+@keyframes icFadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ic-fade-up { animation: icFadeUp 0.6s ease-out both; }
+
+@keyframes icCurtainOut {
+  to { opacity: 0; transform: translateY(-2%); visibility: hidden; }
+}
+.ic-curtain-out { animation: icCurtainOut 0.55s ease-in forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ic-sweep, .ic-ping, .ic-fade-up, .pulse-radar { animation: none; }
 }

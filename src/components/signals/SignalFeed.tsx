@@ -17,7 +17,7 @@ import {
 interface SignalFeedProps {
   signals: EarlySignal[];
   onSelectSignal: (signal: EarlySignal) => void;
-  onOpenSimulator: () => void;
+  onOpenSimulator?: () => void;
 }
 
 export const SignalFeed: React.FC<SignalFeedProps> = ({
@@ -95,6 +95,7 @@ export const SignalFeed: React.FC<SignalFeedProps> = ({
           </div>
         </div>
 
+        {onOpenSimulator && (
         <button
           onClick={onOpenSimulator}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 transition shadow-md shadow-amber-500/20 shrink-0 self-start sm:self-auto"
@@ -102,6 +103,7 @@ export const SignalFeed: React.FC<SignalFeedProps> = ({
           <PlusCircle className="w-4 h-4" />
           <span>Ingestar / Simular Nueva Señal</span>
         </button>
+        )}
       </div>
 
       {/* Filter and Search Bar */}

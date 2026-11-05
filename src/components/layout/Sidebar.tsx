@@ -1,17 +1,6 @@
 import React from 'react';
-import {
-  LayoutDashboard,
-  Radio,
-  Pickaxe,
-  Network,
-  Target,
-  Sliders,
-  FileText,
-  ChevronRight,
-  ShieldCheck,
-  Building2,
-  TrendingUp
-} from 'lucide-react';
+import { Settings, Plus, ShieldCheck } from 'lucide-react';
+import { RadarWordmark, ClientLogo, ClientBrand } from '../brand/ICSeal';
 
 export type ActiveTab = 'dashboard' | 'signals' | 'projects' | 'ecosystem' | 'opportunities' | 'scoring';
 
@@ -25,141 +14,134 @@ interface SidebarProps {
     opportunities: number;
   };
   sources?: string[];
+  clientBrand?: ClientBrand;
+  onOpenAccount?: () => void;
 }
+
+export const NAV_ITEMS: { id: ActiveTab; label: string; subtitle: string; countKey?: keyof SidebarProps['counts'] }[] = [
+  { id: 'dashboard', label: 'Inicio', subtitle: 'Resumen del mercado' },
+  { id: 'opportunities', label: 'Oportunidades', subtitle: 'Su pipeline comercial', countKey: 'opportunities' },
+  { id: 'projects', label: 'Proyectos', subtitle: 'Cartera y etapas', countKey: 'projects' },
+  { id: 'signals', label: 'Señales', subtitle: 'Huellas recientes', countKey: 'signals' },
+  { id: 'ecosystem', label: 'Ecosistema', subtitle: 'Titulares y contratistas', countKey: 'companies' },
+];
+
+export const SECTION_TITLES: Record<ActiveTab, string> = {
+  dashboard: 'Inicio',
+  opportunities: 'Oportunidades',
+  projects: 'Proyectos',
+  signals: 'Señales',
+  ecosystem: 'Ecosistema',
+  scoring: 'Modelo de puntaje',
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onTabChange,
   counts,
   sources = [],
+  clientBrand,
+  onOpenAccount,
 }) => {
-  const navItems = [
-    {
-      id: 'dashboard' as ActiveTab,
-      label: 'Panel & Builder',
-      subtitle: 'Dashboards dinámicos',
-      icon: LayoutDashboard,
-      badge: null,
-    },
-    {
-      id: 'signals' as ActiveTab,
-      label: 'Motor de Señales',
-      subtitle: 'Detección temprana A-H',
-      icon: Radio,
-      badge: counts.signals,
-      badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
-    },
-    {
-      id: 'projects' as ActiveTab,
-      label: 'Cartera de Proyectos',
-      subtitle: '14 etapas & evolución',
-      icon: Pickaxe,
-      badge: counts.projects,
-      badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
-    },
-    {
-      id: 'ecosystem' as ActiveTab,
-      label: 'Ecosistema & Red',
-      subtitle: 'Titular → EPCM → Contratistas',
-      icon: Network,
-      badge: counts.companies,
-      badgeColor: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30',
-    },
-    {
-      id: 'opportunities' as ActiveTab,
-      label: 'Oportunidades B2B',
-      subtitle: 'Scoring 100 pts & decisores',
-      icon: Target,
-      badge: counts.opportunities,
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
-    },
-    {
-      id: 'scoring' as ActiveTab,
-      label: 'Modelo de Scoring',
-      subtitle: 'Ponderación 6 variables',
-      icon: Sliders,
-      badge: '100 pts',
-      badgeColor: 'bg-slate-800 text-slate-300 border border-slate-700',
-    },
-  ];
-
   return (
-    <aside className="w-64 border-r border-slate-800 bg-slate-950/70 flex flex-col shrink-0 min-h-[calc(100vh-4rem)]">
-      {/* Navigation menu */}
-      <nav className="p-3 space-y-1.5 flex-1">
-        <p className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Navegación Analítica
-        </p>
-
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all group ${
-                isActive
-                  ? 'bg-gradient-to-r from-amber-500/15 to-transparent text-white border-l-4 border-amber-400 font-semibold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
-              }`}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className={`p-1.5 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-amber-400/20 text-amber-300'
-                      : 'bg-slate-900 text-slate-400 group-hover:text-slate-200'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div className="truncate">
-                  <div className="text-xs font-semibold leading-tight truncate">
-                    {item.label}
-                  </div>
-                  <div className="text-[10px] text-slate-500 truncate">
-                    {item.subtitle}
-                  </div>
-                </div>
-              </div>
-
-              {item.badge !== null && (
-                <span
-                  className={`text-[11px] font-bold px-1.5 py-0.5 rounded-md ml-2 shrink-0 ${item.badgeColor}`}
-                >
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Info Box: Principio de Funcionamiento */}
-      <div className="p-3 m-3 rounded-xl bg-slate-900/80 border border-slate-800/80 text-[11px] text-slate-400">
-        <div className="flex items-center gap-1.5 font-bold text-slate-300 mb-1">
-          <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
-          <span>Principio Radar</span>
-        </div>
-        <p className="text-[10px] text-slate-400 leading-tight">
-          Fuente → Señal → Proyecto → Evolución → Necesidad → Actor → Oportunidad.
-        </p>
+    <aside className="hidden lg:flex w-[264px] border-r border-slate-800 bg-[#050505] flex-col shrink-0 h-screen sticky top-0">
+      {/* Marca IC */}
+      <div className="px-5 pt-6 pb-5 border-b border-slate-800">
+        <RadarWordmark />
       </div>
 
-      {/* Official Sources Sync Footer */}
-      <div className="p-3 border-t border-slate-900 bg-slate-950 text-[10px] text-slate-500">
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3 text-emerald-400" />
-            <span>Fuentes con señales:</span>
-          </span>
-          <span className="text-slate-400 font-mono text-right">{sources.length ? sources.join(' · ') : 'sin datos'}</span>
+      {/* Co-branding: espacio del cliente */}
+      <div className="px-4 pt-4">
+        <button
+          onClick={onOpenAccount}
+          className="w-full text-left rounded-[10px] border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition p-3 group"
+          title="Personalizar con el logo de su empresa"
+        >
+          <div className="ic-eyebrow text-[9px] text-slate-500 mb-2">Panel de</div>
+          <div className="min-h-[40px] flex items-center">
+            <ClientLogo
+              brand={clientBrand}
+              maxHeight={40}
+              fallback={
+                <span className="flex items-center gap-2 text-xs text-slate-400 group-hover:text-amber-400 transition">
+                  <span className="w-7 h-7 rounded-[6px] border border-dashed border-slate-600 flex items-center justify-center">
+                    <Plus className="w-3.5 h-3.5" />
+                  </span>
+                  Agregar el logo de su empresa
+                </span>
+              }
+            />
+          </div>
+        </button>
+      </div>
+
+      {/* Navegación */}
+      <nav className="px-3 pt-5 flex-1 overflow-y-auto">
+        <p className="px-2 pb-2 ic-eyebrow text-[9px] text-slate-500">Navegación</p>
+        <div className="space-y-0.5">
+          {NAV_ITEMS.map((item, i) => {
+            const active = activeTab === item.id;
+            const count = item.countKey ? counts[item.countKey] : null;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onTabChange(item.id)}
+                className={`relative w-full flex items-center gap-3 px-3 py-3 rounded-[6px] text-left transition ${
+                  active ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
+                }`}
+              >
+                {active && <span className="absolute left-0 top-2 bottom-2 w-[2px] bg-amber-400 rounded" />}
+                <span className={`ic-mono text-[11px] font-bold ${active ? 'text-amber-400' : 'text-slate-600'}`}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[13px] font-bold leading-tight">{item.label}</span>
+                  <span className="block text-[11px] text-slate-500 truncate">{item.subtitle}</span>
+                </span>
+                {count !== null && (
+                  <span className={`ic-mono text-[11px] ${active ? 'text-amber-400' : 'text-slate-500'}`}>{count}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
-        <div className="mt-1 text-[9px] text-slate-500">
-          Historial de cambios por proyecto
+      </nav>
+
+      {/* Configuración y fuentes */}
+      <div className="p-4 border-t border-slate-800 space-y-3">
+        <button
+          onClick={onOpenAccount}
+          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-[6px] border border-slate-800 text-xs font-bold text-slate-300 hover:text-white hover:border-slate-600 transition"
+        >
+          <Settings className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+          Configuración
+        </button>
+        <div className="flex items-start gap-1.5 text-[10px] text-slate-500 leading-relaxed">
+          <ShieldCheck className="w-3 h-3 text-emerald-400 mt-0.5 shrink-0" strokeWidth={1.5} />
+          <span className="ic-mono">{sources.length ? sources.join(' · ') : 'Sincronizando fuentes…'}</span>
         </div>
       </div>
     </aside>
   );
 };
+
+// Navegación horizontal para pantallas angostas
+export const MobileNav: React.FC<{ activeTab: ActiveTab; onTabChange: (t: ActiveTab) => void }> = ({ activeTab, onTabChange }) => (
+  <div className="lg:hidden flex gap-1 overflow-x-auto px-4 py-2 border-b border-slate-800 bg-[#050505]">
+    {NAV_ITEMS.map((item, i) => {
+      const active = activeTab === item.id;
+      return (
+        <button
+          key={item.id}
+          onClick={() => onTabChange(item.id)}
+          className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs font-bold transition ${
+            active ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <span className="ic-mono text-[10px]">{String(i + 1).padStart(2, '0')}</span>
+          {item.label}
+        </button>
+      );
+    })}
+  </div>
+);

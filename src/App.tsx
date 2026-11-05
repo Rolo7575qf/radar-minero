@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/layout/Navbar';
-import { Sidebar, ActiveTab } from './components/layout/Sidebar';
+import { Sidebar, ActiveTab, MobileNav, SECTION_TITLES } from './components/layout/Sidebar';
+import { AccessCurtain } from './components/brand/AccessCurtain';
+import { AccountModal } from './components/account/AccountModal';
+import { ClientBrand, ClientLogo } from './components/brand/ICSeal';
+import { ArrowRight, Briefcase, ImagePlus } from 'lucide-react';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { DashboardBuilderModal } from './components/dashboard/DashboardBuilderModal';
 import { SignalFeed } from './components/signals/SignalFeed';
@@ -100,6 +104,14 @@ export const App: React.FC = () => {
   const [scoringWeights, setScoringWeights] = useState<ScoringWeights>(storageService.getScoringWeights());
   const [providerServices, setProviderServices] = useState<string[]>([]);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [clientBrand, setClientBrand] = useState<ClientBrand>({});
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [dataReady, setDataReady] = useState(false);
+  const [showCurtain, setShowCurtain] = useState<boolean>(() => {
+    try { return sessionStorage.getItem('radar_curtain_seen') !== '1'; } catch { return true; }
+  });
+  const isAdmin = userEmail === 'roloquinonesf@gmail.com';
 
   // Modal State
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
@@ -149,6 +161,7 @@ export const App: React.FC = () => {
           setScoringWeights(ws.scoringWeights);
         }
         if (ws.providerServices) setProviderServices(ws.providerServices);
+        if (ws.clientBrand) setClientBrand(ws.clientBrand);
       }
       // Siempre se recalcula en el cliente: así el puntaje usa las ponderaciones y el perfil de cada usuario
       opps = recalcOpportunities(
@@ -159,6 +172,8 @@ export const App: React.FC = () => {
         ws?.providerServices ?? []
       );
       setOpportunities(opps);
+      setUserEmail(workspaceService.getEmail());
+      setDataReady(true);
     })();
   }, []);
 
@@ -277,14 +292,26 @@ export const App: React.FC = () => {
     storageService.setActiveDashboardId(duplicated.id);
   };
 
+  // Restaura dashboards y ponderaciones; los datos de D1, el pipeline y las notas no se tocan
   const handleRestoreDefaults = () => {
     storageService.resetAllToDefaults();
-    setProjects(storageService.getProjects());
-    setSignals(storageService.getSignals());
-    setOpportunities(storageService.getOpportunities());
+    storageService.saveProjects(projects);
+    storageService.saveSignals(signals);
+    const weights = storageService.getScoringWeights();
     setDashboards(storageService.getDashboards());
     setActiveDashboardId(storageService.getActiveDashboardId());
-    setScoringWeights(storageService.getScoringWeights());
+    setScoringWeights(weights);
+    setOpportunities(recalcOpportunities(rawOpportunities, projects, signals, weights, providerServices));
+  };
+
+  const handleSaveBrand = (b: ClientBrand) => {
+    setClientBrand(b);
+    workspaceService.queueSave({ clientBrand: b });
+  };
+
+  const enterRadar = () => {
+    setShowCurtain(false);
+    try { sessionStorage.setItem('radar_curtain_seen', '1'); } catch { /* sin almacenamiento */ }
   };
 
   // Handler for New Signal Ingestion / Simulation
@@ -339,39 +366,80 @@ export const App: React.FC = () => {
     dashboards.find((d) => d.id === activeDashboardId) || dashboards[0];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
-      {/* Top Navbar */}
-      <Navbar
-        selectedCountry={selectedCountry}
-        onSelectCountry={setSelectedCountry}
-        onOpenSignalSimulator={() => setIsSimulatorOpen(true)}
-        onOpenScoringConfig={() => setIsScoringConfigOpen(true)}
-        onOpenProviderProfile={() => setIsProfileOpen(true)}
-        providerServicesCount={providerServices.length}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onResetData={handleRestoreDefaults}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans">
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        counts={{
+          signals: filteredSignalsByCountry.length,
+          projects: filteredProjectsByCountry.length,
+          companies: companies.length,
+          opportunities: filteredOpportunitiesByCountry.length,
+        }}
         sources={sources}
-        lastSignalDate={lastSignalDate}
+        clientBrand={clientBrand}
+        onOpenAccount={() => setIsAccountOpen(true)}
       />
 
-      {/* Main Layout Body */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          counts={{
-            signals: filteredSignalsByCountry.length,
-            projects: filteredProjectsByCountry.length,
-            companies: companies.length,
-            opportunities: filteredOpportunitiesByCountry.length,
-          }}
-          sources={sources}
+      <div className="flex-1 min-w-0 flex flex-col">
+        <Navbar
+          sectionTitle={SECTION_TITLES[activeTab]}
+          selectedCountry={selectedCountry}
+          onSelectCountry={setSelectedCountry}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onOpenAccount={() => setIsAccountOpen(true)}
+          onOpenSignalSimulator={isAdmin ? () => setIsSimulatorOpen(true) : undefined}
+          userEmail={userEmail}
+          clientBrand={clientBrand}
+          projectsCount={projects.length}
+          lastSignalDate={lastSignalDate}
         />
+        <MobileNav activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Content View Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          {activeTab === 'dashboard' && (
+            <section className="relative mb-8 rounded-[16px] border border-slate-800 bg-[#050505] ic-dot-grid overflow-hidden">
+              <div className="relative p-6 lg:p-8 flex flex-col lg:flex-row lg:items-end gap-6 justify-between">
+                <div className="max-w-2xl">
+                  <div className="flex items-center gap-2">
+                    <span className="ic-rule" />
+                    <span className="ic-eyebrow text-[10px] text-amber-400">Panel de {clientBrand.name || 'su empresa'}</span>
+                  </div>
+                  <h2 className="ic-display text-white text-[30px] sm:text-[40px] mt-3">
+                    Mercado minero en seguimiento<span className="text-amber-400">.</span>
+                  </h2>
+                  <p className="mt-3 text-sm text-slate-300 leading-relaxed">
+                    {filteredProjectsByCountry.length} proyectos con huellas públicas, US$
+                    {(filteredProjectsByCountry.reduce((t, p) => t + (p.capexEstimatedMillionsUSD || 0), 0) / 1000).toLocaleString('es-CL', { maximumFractionDigits: 1 })} mil millones en inversión declarada y{' '}
+                    {filteredOpportunitiesByCountry.filter((o) => o.priority === 'Máxima' || o.priority === 'Alta').length} oportunidades de prioridad alta para su empresa.
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <button onClick={() => setActiveTab('opportunities')} className="flex items-center gap-2 px-4 py-2.5 rounded-[6px] bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-bold tracking-[0.12em]">
+                      VER MIS OPORTUNIDADES <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                    {providerServices.length === 0 && (
+                      <button onClick={() => setIsProfileOpen(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-[6px] border border-amber-400/60 text-amber-400 hover:bg-amber-400/10 text-[11px] font-bold tracking-[0.12em]">
+                        <Briefcase className="w-3.5 h-3.5" strokeWidth={1.5} /> DEFINIR MI PERFIL DE PROVEEDOR
+                      </button>
+                    )}
+                    {!clientBrand.logo && (
+                      <button onClick={() => setIsAccountOpen(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-[6px] border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 text-[11px] font-bold tracking-[0.12em]">
+                        <ImagePlus className="w-3.5 h-3.5" strokeWidth={1.5} /> AGREGAR MI LOGO
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {clientBrand.logo && (
+                  <div className="rounded-[10px] bg-white px-6 py-4 flex items-center justify-center min-w-[180px] min-h-[80px]">
+                    <ClientLogo brand={clientBrand} maxHeight={52} />
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
           {activeTab === 'dashboard' && (
             <DashboardView
               dashboards={dashboards}
@@ -400,7 +468,7 @@ export const App: React.FC = () => {
             <SignalFeed
               signals={filteredSignalsByCountry}
               onSelectSignal={setSelectedSignal}
-              onOpenSimulator={() => setIsSimulatorOpen(true)}
+              onOpenSimulator={isAdmin ? () => setIsSimulatorOpen(true) : undefined}
             />
           )}
 
@@ -531,6 +599,35 @@ export const App: React.FC = () => {
           onClose={() => setIsSimulatorOpen(false)}
           projects={projects}
           onIngestSignal={handleIngestSignal}
+        />
+      )}
+
+      {isAccountOpen && (
+        <AccountModal
+          isOpen={isAccountOpen}
+          onClose={() => setIsAccountOpen(false)}
+          email={userEmail}
+          brand={clientBrand}
+          onSaveBrand={handleSaveBrand}
+          providerServices={providerServices}
+          onOpenProviderProfile={() => { setIsAccountOpen(false); setIsProfileOpen(true); }}
+          onOpenScoringConfig={() => { setIsAccountOpen(false); setIsScoringConfigOpen(true); }}
+          onOpenScoringGuide={() => { setIsAccountOpen(false); setActiveTab('scoring'); }}
+          onRestoreDefaults={handleRestoreDefaults}
+        />
+      )}
+
+      {showCurtain && (
+        <AccessCurtain
+          ready={dataReady}
+          email={userEmail}
+          clientBrand={clientBrand}
+          stats={{
+            projects: projects.length,
+            capexMillions: projects.reduce((t, p) => t + (p.capexEstimatedMillionsUSD || 0), 0),
+            signals: signals.length,
+          }}
+          onEnter={enterRadar}
         />
       )}
 
