@@ -59,6 +59,10 @@ export interface CommercialOpportunity {
     title: string;
     company: string;
     relevanceNote: string;
+    email?: string;
+    emailStatus?: 'verificado' | 'aceptado_sin_verificar' | 'no_verificado';
+    phone?: string;
+    linkedinUrl?: string;
   }[];
   anticipationWindowMonths: number; // Ej: 6 a 12 meses antes de RFQ
   priority: OpportunityPriority;

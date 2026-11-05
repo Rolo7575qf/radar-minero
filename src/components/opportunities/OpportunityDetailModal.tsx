@@ -326,6 +326,46 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                   <p className="text-[10px] text-slate-400 leading-relaxed mt-1">
                     {dm.relevanceNote}
                   </p>
+                  {(dm.email || dm.phone || dm.linkedinUrl) && (
+                    <div className="mt-2 pt-2 border-t border-slate-800 space-y-1">
+                      {dm.email && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <a
+                            href={`mailto:${dm.email}`}
+                            className="text-[11px] font-mono text-white hover:text-amber-300 break-all"
+                          >
+                            {dm.email}
+                          </a>
+                          <span
+                            className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                              dm.emailStatus === 'verificado'
+                                ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/40'
+                                : 'bg-slate-800 text-slate-400 border border-slate-700'
+                            }`}
+                          >
+                            {dm.emailStatus === 'verificado'
+                              ? 'Verificado'
+                              : dm.emailStatus === 'aceptado_sin_verificar'
+                              ? 'Sin confirmar'
+                              : 'No verificado'}
+                          </span>
+                        </div>
+                      )}
+                      {dm.phone && (
+                        <div className="text-[11px] font-mono text-slate-300">{dm.phone}</div>
+                      )}
+                      {dm.linkedinUrl && (
+                        <a
+                          href={dm.linkedinUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[10px] text-amber-300 hover:underline"
+                        >
+                          Ver perfil en LinkedIn
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
