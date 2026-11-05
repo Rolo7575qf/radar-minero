@@ -1,4 +1,5 @@
 import React from 'react';
+import { getHorizon, monthsUntil } from '../../../services/horizon';
 import { CommercialOpportunity, OpportunityPriority } from '../../../types/opportunity';
 import { Badge } from '../../common/Badge';
 import { Target, ArrowUpRight, UserCheck, ShieldAlert } from 'lucide-react';
@@ -85,7 +86,7 @@ export const OpportunityPriorityWidget: React.FC<OpportunityPriorityWidgetProps>
                   {opp.keyDecisionMakers.length} decisores mapeados
                 </span>
                 <span className="text-slate-400">
-                  Ventana: <strong className="text-amber-400">{opp.anticipationWindowMonths} meses</strong>
+                  Ventana: <strong className="text-amber-400">{monthsUntil(opp.targetRfqDate, opp.anticipationWindowMonths)} meses · {getHorizon(monthsUntil(opp.targetRfqDate, opp.anticipationWindowMonths)).label}</strong>
                 </span>
               </div>
             </div>

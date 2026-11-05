@@ -64,7 +64,10 @@ export interface CommercialOpportunity {
     phone?: string;
     linkedinUrl?: string;
   }[];
-  anticipationWindowMonths: number; // Ej: 6 a 12 meses antes de RFQ
+  anticipationWindowMonths: number; // Meses guardados al detectar (referencia)
+  targetRfqDate?: string;           // Fecha objetivo del RFQ (ISO)
+  targetBasis?: string;             // 'estimada' | 'publicada' | 'confirmada'
+  lastReviewed?: string;            // Última verificación (ISO)
   priority: OpportunityPriority;
   confidence: 'Alta' | 'Media' | 'Baja';
   recommendedNextAction: string; // Ej: "Agendar reunión con Study Director en Expomin / Enviar whitepaper técnico"

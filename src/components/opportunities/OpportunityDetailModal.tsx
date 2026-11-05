@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CommercialOpportunity, CommercialStatus } from '../../types/opportunity';
 import { Badge } from '../common/Badge';
+import { getHorizon, monthsUntil, formatDateEs } from '../../services/horizon';
 import {
   X,
   Target,
@@ -156,7 +157,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               </p>
               <div className="mt-2 text-[11px] text-slate-800 flex flex-wrap items-center gap-3">
                 <span>
-                  Ventana de anticipación: <strong>{opportunity.anticipationWindowMonths} meses</strong> antes de la licitación
+                  Ventana: <strong>{getHorizon(monthsUntil(opportunity.targetRfqDate, opportunity.anticipationWindowMonths)).label} · {monthsUntil(opportunity.targetRfqDate, opportunity.anticipationWindowMonths)} meses</strong> hasta el RFQ ({opportunity.targetBasis ?? 'estimada'}: {formatDateEs(opportunity.targetRfqDate)}) · verificado {formatDateEs(opportunity.lastReviewed)}
                 </span>
                 <span>·</span>
                 <span>

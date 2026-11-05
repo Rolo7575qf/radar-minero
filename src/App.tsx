@@ -32,6 +32,7 @@ import { buildEcosystem } from './services/ecosystemBuilder';
 import { workspaceService, OppOverride } from './services/workspaceService';
 import { signalEngine, IngestSignalPayload } from './services/signalEngine';
 import { calculateOpportunityScore, getPriorityFromScore } from './services/scoringService';
+import { monthsUntil } from './services/horizon';
 
 // Recalcula puntaje y prioridad de todas las oportunidades con unas ponderaciones dadas.
 const recalcOpportunities = (
@@ -62,7 +63,7 @@ const recalcOpportunities = (
       projSignals,
       opp.involvedCompanies.length,
       opp.keyDecisionMakers.length,
-      opp.anticipationWindowMonths,
+      monthsUntil(opp.targetRfqDate, opp.anticipationWindowMonths),
       weights,
       { services, needText }
     );

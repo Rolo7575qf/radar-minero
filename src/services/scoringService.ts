@@ -2,6 +2,7 @@ import { ScoringWeights, ScoreBreakdown, CommercialOpportunity } from '../types/
 import { MiningProject } from '../types/project';
 import { EarlySignal } from '../types/signal';
 import { detectCategories, serviceLabel } from '../data/serviceCatalog';
+import { getHorizon } from './horizon';
 
 // Perfil del proveedor: servicios que ofrece y texto del proyecto donde se buscan las necesidades.
 export interface ServiceFitInput {
@@ -132,18 +133,9 @@ export function calculateOpportunityScore(
   }
 
   // 6. Ventana de anticipación comercial (0 - 100 raw)
-  let rawAnticipation = 60;
-  let anticipationExplanation = `${anticipationMonths} meses estimados de anticipación.`;
-  if (anticipationMonths >= 6 && anticipationMonths <= 18) {
-    rawAnticipation = 95;
-    anticipationExplanation = `Ventana comercial óptima (${anticipationMonths} meses): tiempo suficiente para posicionar solución antes del RFI formal.`;
-  } else if (anticipationMonths > 18) {
-    rawAnticipation = 70;
-    anticipationExplanation = `Ventana amplia (${anticipationMonths} meses): monitoreo y siembra de relación a mediano plazo.`;
-  } else {
-    rawAnticipation = 65;
-    anticipationExplanation = `Ventana corta (${anticipationMonths} meses): requiere contacto urgente ante inminente proceso.`;
-  }
+  const horizon = getHorizon(anticipationMonths);
+  const rawAnticipation = horizon.rawScore;
+  const anticipationExplanation = `${horizon.label} (${anticipationMonths} meses): ${horizon.description}`;
 
   // Ponderación normalizada sobre 100 puntos
   const totalWeight =

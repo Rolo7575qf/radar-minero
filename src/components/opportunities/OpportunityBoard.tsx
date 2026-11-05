@@ -5,6 +5,7 @@ import {
   CommercialStatus,
 } from '../../types/opportunity';
 import { Badge } from '../common/Badge';
+import { getHorizon, monthsUntil, formatDateEs } from '../../services/horizon';
 import { SectionHeader } from '../common/SectionHeader';
 import {
   Target,
@@ -240,7 +241,8 @@ export const OpportunityBoard: React.FC<OpportunityBoardProps> = ({
                           {opp.keyDecisionMakers.length ? `${opp.keyDecisionMakers.length} decisores` : 'Sin decisores'}
                         </span>
                         <span className="ic-mono text-slate-300">
-                          VENTANA <span className="text-amber-400 font-bold">{opp.anticipationWindowMonths} M</span>
+                          <span className={`mr-1.5 px-1.5 py-0.5 border rounded text-[9px] uppercase ${getHorizon(monthsUntil(opp.targetRfqDate, opp.anticipationWindowMonths)).tone}`}>{getHorizon(monthsUntil(opp.targetRfqDate, opp.anticipationWindowMonths)).label}</span>
+                          <span className="text-amber-400 font-bold">{monthsUntil(opp.targetRfqDate, opp.anticipationWindowMonths)} M</span>
                         </span>
                       </div>
                     </div>
@@ -309,7 +311,8 @@ export const OpportunityBoard: React.FC<OpportunityBoardProps> = ({
                       </Badge>
                     </td>
                     <td className="py-3 px-4 font-mono text-amber-400 font-semibold">
-                      {opp.anticipationWindowMonths} meses
+                      {monthsUntil(opp.targetRfqDate, opp.anticipationWindowMonths)} meses · {getHorizon(monthsUntil(opp.targetRfqDate, opp.anticipationWindowMonths)).label}
+                      <span className="block text-[10px] text-slate-500 font-normal">RFQ {opp.targetBasis ?? 'est.'} {formatDateEs(opp.targetRfqDate)} · verif. {formatDateEs(opp.lastReviewed)}</span>
                     </td>
                     <td className="py-3 px-4 text-slate-300">
                       <span className="flex items-center gap-1">
