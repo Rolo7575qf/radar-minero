@@ -15,6 +15,7 @@ export interface WorkspaceState {
   scoringWeights?: ScoringWeights;
   dashboards?: DashboardConfig[];
   activeDashboardId?: string;
+  providerServices?: string[]; // perfil de proveedor: ids de servicios que ofrece
 }
 
 let ready = false;

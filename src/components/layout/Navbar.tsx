@@ -8,7 +8,8 @@ import {
   Search,
   Bell,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Briefcase
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -16,6 +17,8 @@ interface NavbarProps {
   onSelectCountry: (country: string) => void;
   onOpenSignalSimulator: () => void;
   onOpenScoringConfig: () => void;
+  onOpenProviderProfile?: () => void;
+  providerServicesCount?: number;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onResetData: () => void;
@@ -28,6 +31,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectCountry,
   onOpenSignalSimulator,
   onOpenScoringConfig,
+  onOpenProviderProfile,
+  providerServicesCount = 0,
   searchQuery,
   onSearchChange,
   onResetData,
@@ -92,6 +97,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             ))}
           </div>
+
+          {/* Provider profile */}
+          <button
+            onClick={onOpenProviderProfile}
+            title="Mi perfil de proveedor: servicios que ofreces"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition"
+          >
+            <Briefcase className="w-3.5 h-3.5 text-amber-400" />
+            <span>{providerServicesCount > 0 ? `Mi perfil (${providerServicesCount})` : 'Mi perfil'}</span>
+          </button>
 
           {/* Scoring Engine Config Button */}
           <button

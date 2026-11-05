@@ -1,6 +1,13 @@
 import { ScoringWeights, ScoreBreakdown, CommercialOpportunity } from '../types/opportunity';
 import { MiningProject } from '../types/project';
 import { EarlySignal } from '../types/signal';
+import { detectCategories, serviceLabel } from '../data/serviceCatalog';
+
+// Perfil del proveedor: servicios que ofrece y texto del proyecto donde se buscan las necesidades.
+export interface ServiceFitInput {
+  services: string[];
+  needText: string;
+}
 
 export const DEFAULT_WEIGHTS: ScoringWeights = {
   maturity: 20,
@@ -26,7 +33,8 @@ export function calculateOpportunityScore(
   involvedActorsCount: number,
   decisionMakersCount: number,
   anticipationMonths: number,
-  customWeights: ScoringWeights = DEFAULT_WEIGHTS
+  customWeights: ScoringWeights = DEFAULT_WEIGHTS,
+  fit?: ServiceFitInput
 ): ScoreBreakdown {
   // 1. Madurez del proyecto (0 - 100 raw)
   let rawMaturity = 40;
@@ -72,8 +80,24 @@ export function calculateOpportunityScore(
   }
 
   // 3. Compatibilidad con servicios potenciales (0 - 100 raw)
-  const rawServiceFit = 85;
-  const serviceFitExplanation = 'Elevada demanda técnica alineada con especialidad de contratistas y consultores.';
+  let rawServiceFit = 50;
+  let serviceFitExplanation = 'Define tu perfil de proveedor para medir la compatibilidad real con este proyecto.';
+  if (fit && fit.services.length > 0) {
+    const needs = detectCategories(fit.needText);
+    if (needs.length === 0) {
+      rawServiceFit = 40;
+      serviceFitExplanation = 'Alcance por confirmar: aún no hay servicios identificables en la información del proyecto.';
+    } else {
+      const matched = needs.filter((n) => fit.services.includes(n));
+      if (matched.length === 0) {
+        rawServiceFit = 10;
+        serviceFitExplanation = `El proyecto demanda ${needs.map(serviceLabel).join(', ')}; ninguno coincide con tu perfil.`;
+      } else {
+        rawServiceFit = Math.min(95, Math.round(55 + (40 * matched.length) / needs.length));
+        serviceFitExplanation = `Coinciden ${matched.length} de ${needs.length} servicios que demanda el proyecto: ${matched.map(serviceLabel).join(', ')}.`;
+      }
+    }
+  }
 
   // 4. Identificación de actores y decisores (0 - 100 raw)
   let rawActors = 40;

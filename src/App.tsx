@@ -14,6 +14,8 @@ import { CompanyDetailModal } from './components/ecosystem/CompanyDetailModal';
 import { OpportunityBoard } from './components/opportunities/OpportunityBoard';
 import { OpportunityDetailModal } from './components/opportunities/OpportunityDetailModal';
 import { ScoringConfigModal } from './components/opportunities/ScoringConfigModal';
+import { ProviderProfileModal } from './components/opportunities/ProviderProfileModal';
+import { detectCategories } from './data/serviceCatalog';
 
 import { MiningProject } from './types/project';
 import { EarlySignal } from './types/signal';
@@ -32,18 +34,33 @@ const recalcOpportunities = (
   opps: CommercialOpportunity[],
   projs: MiningProject[],
   sigs: EarlySignal[],
-  weights: ScoringWeights
+  weights: ScoringWeights,
+  services: string[] = []
 ): CommercialOpportunity[] =>
   opps.map((opp) => {
     const proj = projs.find((p) => p.id === opp.relatedProjectId) || {};
     const projSignals = sigs.filter((sg) => sg.relatedProjectId === opp.relatedProjectId);
+    // Texto donde se buscan los servicios que demanda el proyecto (sin la interpretación genérica)
+    const needText = [
+      (proj as Partial<MiningProject>).name,
+      (proj as Partial<MiningProject>).productiveCapacity,
+      opp.potentialNeed,
+      opp.relatedSolutionCategory,
+      ...projSignals.flatMap((sg) => [
+        ...sg.commercialInterpretation.targetServices,
+        ...sg.commercialInterpretation.potentialNeeds,
+      ]),
+    ]
+      .filter(Boolean)
+      .join(' ');
     const newScore = calculateOpportunityScore(
       proj,
       projSignals,
       opp.involvedCompanies.length,
       opp.keyDecisionMakers.length,
       opp.anticipationWindowMonths,
-      weights
+      weights,
+      { services, needText }
     );
     return { ...opp, scoring: newScore, priority: getPriorityFromScore(newScore.totalScore) };
   });
@@ -81,6 +98,8 @@ export const App: React.FC = () => {
   const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
   const [activeDashboardId, setActiveDashboardId] = useState<string>('');
   const [scoringWeights, setScoringWeights] = useState<ScoringWeights>(storageService.getScoringWeights());
+  const [providerServices, setProviderServices] = useState<string[]>([]);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Modal State
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
@@ -128,9 +147,17 @@ export const App: React.FC = () => {
         if (ws.scoringWeights) {
           storageService.saveScoringWeights(ws.scoringWeights);
           setScoringWeights(ws.scoringWeights);
-          opps = recalcOpportunities(opps, projs, sigs, ws.scoringWeights);
         }
+        if (ws.providerServices) setProviderServices(ws.providerServices);
       }
+      // Siempre se recalcula en el cliente: así el puntaje usa las ponderaciones y el perfil de cada usuario
+      opps = recalcOpportunities(
+        opps,
+        projs,
+        sigs,
+        ws?.scoringWeights ?? storageService.getScoringWeights(),
+        ws?.providerServices ?? []
+      );
       setOpportunities(opps);
     })();
   }, []);
@@ -281,10 +308,17 @@ export const App: React.FC = () => {
     storageService.saveScoringWeights(newWeights);
 
     // Recalculate scoring for all opportunities
-    const recalculated = recalcOpportunities(rawOpportunities, projects, signals, newWeights);
+    const recalculated = recalcOpportunities(rawOpportunities, projects, signals, newWeights, providerServices);
 
     setOpportunities(recalculated);
     storageService.saveOpportunities(recalculated);
+  };
+
+  // Guardar perfil de proveedor: recalcula la compatibilidad de servicios y se guarda por usuario
+  const handleSaveProfile = (services: string[]) => {
+    setProviderServices(services);
+    workspaceService.queueSave({ providerServices: services });
+    setOpportunities(recalcOpportunities(rawOpportunities, projects, signals, scoringWeights, services));
   };
 
   // Cambio de etapa / nota de una oportunidad (se guarda por usuario en D1)
@@ -312,6 +346,8 @@ export const App: React.FC = () => {
         onSelectCountry={setSelectedCountry}
         onOpenSignalSimulator={() => setIsSimulatorOpen(true)}
         onOpenScoringConfig={() => setIsScoringConfigOpen(true)}
+        onOpenProviderProfile={() => setIsProfileOpen(true)}
+        providerServicesCount={providerServices.length}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onResetData={handleRestoreDefaults}
@@ -495,6 +531,15 @@ export const App: React.FC = () => {
           onClose={() => setIsSimulatorOpen(false)}
           projects={projects}
           onIngestSignal={handleIngestSignal}
+        />
+      )}
+
+      {isProfileOpen && (
+        <ProviderProfileModal
+          isOpen={isProfileOpen}
+          onClose={() => setIsProfileOpen(false)}
+          currentServices={providerServices}
+          onSave={handleSaveProfile}
         />
       )}
 
