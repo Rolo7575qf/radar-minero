@@ -161,8 +161,9 @@ export const App: React.FC = () => {
       if (ws) {
         if (ws.oppOverrides) setOppOverrides(ws.oppOverrides);
         if (ws.dashboards && ws.dashboards.length) {
-          storageService.saveDashboards(ws.dashboards);
-          setDashboards(ws.dashboards);
+          const fresh = storageService.refreshPredefinedTexts(ws.dashboards);
+          storageService.saveDashboards(fresh);
+          setDashboards(fresh);
         }
         if (ws.activeDashboardId) {
           storageService.setActiveDashboardId(ws.activeDashboardId);

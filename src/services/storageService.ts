@@ -55,6 +55,22 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEYS.OPPORTUNITIES, JSON.stringify(opps));
   },
 
+  /** Los tableros predefinidos toman siempre el texto vigente, aunque el usuario tenga una copia guardada. */
+  refreshPredefinedTexts(dashboards: DashboardConfig[]): DashboardConfig[] {
+    return dashboards.map((d) => {
+      const base = defaultDashboards.find((x) => x.id === d.id);
+      if (!base || !d.isPredefined) return d;
+      return {
+        ...d,
+        description: base.description,
+        widgets: d.widgets.map((w) => {
+          const bw = base.widgets.find((x) => x.id === w.id);
+          return bw ? { ...w, title: bw.title, customDescription: bw.customDescription } : w;
+        }),
+      };
+    });
+  },
+
   getDashboards(): DashboardConfig[] {
     const data = localStorage.getItem(STORAGE_KEYS.DASHBOARDS);
     if (!data) {
@@ -62,7 +78,7 @@ export const storageService = {
       return defaultDashboards;
     }
     try {
-      return JSON.parse(data);
+      return this.refreshPredefinedTexts(JSON.parse(data));
     } catch {
       return defaultDashboards;
     }

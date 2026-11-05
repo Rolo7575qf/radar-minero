@@ -37,7 +37,7 @@ export const MetricWidget: React.FC<MetricWidgetProps> = ({
   } else if (widget.metric === 'signal_count') {
     const recent = signals.filter(sg => within30(sg.publishedDate));
     displayValue = recent.length;
-    subtitle = 'Señales publicadas en fuentes oficiales y prensa en los últimos 30 días';
+    subtitle = 'Señales publicadas en fuentes oficiales y prensa en los últimos 30 días (la huella histórica llega a 3 años)';
     chipText = `${recent.filter(sg => sg.relevance === 'Crítica' || sg.relevance === 'Alta').length} de relevancia alta o crítica`;
     Icon = Radio;
   } else if (widget.metric === 'opportunity_count') {

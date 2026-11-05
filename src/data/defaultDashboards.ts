@@ -4,7 +4,7 @@ export const defaultDashboards: DashboardConfig[] = [
   {
     id: 'dash-main-executive',
     name: 'Radar Ejecutivo Minero — LatAm & Chile',
-    description: 'Tablero consolidado de proyectos, detección de señales en 7/30/90 días y oportunidades comerciales de alta prioridad.',
+    description: 'Tablero consolidado de proyectos, huellas de cada proyecto hasta 3 años atrás, señales recientes y oportunidades comerciales de alta prioridad.',
     isDefault: true,
     isPredefined: true,
     createdAt: '2026-10-01T00:00:00Z',
@@ -23,14 +23,14 @@ export const defaultDashboards: DashboardConfig[] = [
       },
       {
         id: 'w-kpi-2',
-        title: 'Señales detectadas (30 días)',
+        title: 'Señales recientes (30 días)',
         type: 'kpi_metric',
         dimension: 'signal_category',
         metric: 'signal_count',
         width: 'third',
         height: 'sm',
         colorScheme: 'cyan',
-        customDescription: 'Eventos ambientales, de inversión y de contratación publicados en los últimos 30 días'
+        customDescription: 'Eventos ambientales, de inversión y de contratación publicados en los últimos 30 días. El historial de huellas llega a 3 años (Proyectos → Línea de tiempo)'
       },
       {
         id: 'w-kpi-3',
