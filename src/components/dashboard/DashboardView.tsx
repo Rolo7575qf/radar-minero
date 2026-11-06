@@ -192,7 +192,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Grid Dinámico de Widgets (12 columnas) */}
       <div className="grid grid-cols-12 gap-5">
-        {currentDashboard?.widgets.map((widget) => (
+        {(currentDashboard?.widgets || []).map((widget) => (
           <WidgetCard key={widget.id} widget={widget}>
             {renderWidgetContent(widget)}
           </WidgetCard>

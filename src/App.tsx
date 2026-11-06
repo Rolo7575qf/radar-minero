@@ -55,8 +55,8 @@ const recalcOpportunities = (
       opp.potentialNeed,
       opp.relatedSolutionCategory,
       ...projSignals.flatMap((sg) => [
-        ...sg.commercialInterpretation.targetServices,
-        ...sg.commercialInterpretation.potentialNeeds,
+        ...(sg.commercialInterpretation?.targetServices || []),
+        ...(sg.commercialInterpretation?.potentialNeeds || []),
       ]),
     ]
       .filter(Boolean)
@@ -64,8 +64,8 @@ const recalcOpportunities = (
     const newScore = calculateOpportunityScore(
       proj,
       projSignals,
-      opp.involvedCompanies.length,
-      opp.keyDecisionMakers.length,
+      opp.involvedCompanies?.length || 0,
+      opp.keyDecisionMakers?.length || 0,
       monthsUntil(opp.targetRfqDate, opp.anticipationWindowMonths),
       weights,
       { services, needText }
@@ -201,29 +201,32 @@ export const App: React.FC = () => {
   // Filter projects/signals by global search or country
   const filteredProjectsByCountry = projects.filter((p) => {
     const matchesCountry = selectedCountry === 'Todos' || p.country === selectedCountry;
-    const matchesQuery = !searchQuery ||
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.ownerCompany.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.mainMineral.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.region.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = (searchQuery || '').toLowerCase();
+    const matchesQuery = !q ||
+      String(p.name || '').toLowerCase().includes(q) ||
+      String(p.ownerCompany || '').toLowerCase().includes(q) ||
+      String(p.mainMineral || '').toLowerCase().includes(q) ||
+      String(p.region || '').toLowerCase().includes(q);
     return matchesCountry && matchesQuery;
   });
 
   const filteredSignalsByCountry = signals.filter((s) => {
     const matchesCountry = selectedCountry === 'Todos' || s.country === selectedCountry;
-    const matchesQuery = !searchQuery ||
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.relatedProjectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.commercialInterpretation.hypothesis.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = (searchQuery || '').toLowerCase();
+    const matchesQuery = !q ||
+      String(s.name || '').toLowerCase().includes(q) ||
+      String(s.relatedProjectName || '').toLowerCase().includes(q) ||
+      String(s.commercialInterpretation?.hypothesis || '').toLowerCase().includes(q);
     return matchesCountry && matchesQuery;
   });
 
   const filteredOpportunitiesByCountry = opportunities.filter((o) => {
     const matchesCountry = selectedCountry === 'Todos' || o.country === selectedCountry;
-    const matchesQuery = !searchQuery ||
-      o.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.targetCompany.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.relatedProjectName.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = (searchQuery || '').toLowerCase();
+    const matchesQuery = !q ||
+      String(o.title || '').toLowerCase().includes(q) ||
+      String(o.targetCompany || '').toLowerCase().includes(q) ||
+      String(o.relatedProjectName || '').toLowerCase().includes(q);
     return matchesCountry && matchesQuery;
   });
 

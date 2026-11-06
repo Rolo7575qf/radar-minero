@@ -5,10 +5,10 @@ import { CommercialOpportunity } from '../types/opportunity';
 import { MiningCompany, EcosystemRelation, CompanyRole, Actor, CompanyKeyContact } from '../types/company';
 
 const slug = (s: string) =>
-  s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 const mapRole = (raw: string): { role: CompanyRole; relation: EcosystemRelation['relationType'] } => {
-  const r = raw.toLowerCase();
+  const r = String(raw || '').toLowerCase();
   if (r.includes('epcm')) return { role: 'EPCM', relation: 'epcm' };
   if (r.includes('matriz')) return { role: 'Grupo Empresarial / Matriz', relation: 'socio' };
   if (r.includes('socio') || r.includes('financia')) return { role: 'Socio Inversionista', relation: 'socio' };
