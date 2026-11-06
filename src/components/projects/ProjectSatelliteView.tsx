@@ -161,7 +161,7 @@ export const ProjectSatelliteView: React.FC<ProjectSatelliteViewProps> = ({ proj
       </div>
 
       {/* Contenedor del Mapa Satelital */}
-      <div className="relative rounded-lg overflow-hidden border border-slate-800 h-[260px] sm:h-[300px] w-full bg-slate-900">
+      <div className="relative rounded-lg overflow-hidden border border-slate-800 h-[260px] sm:h-[300px] w-full bg-slate-900 z-0 isolate">
         <div ref={mapContainerRef} className="h-full w-full z-0" />
         
         {/* Overlay informativo flotante en la esquina inferior izquierda */}

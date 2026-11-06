@@ -59,7 +59,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   const { scoring } = opportunity;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
       <div className="bg-slate-950 border border-slate-800 rounded-[16px] w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="relative px-6 py-6 border-b border-slate-800 flex items-start justify-between gap-6 bg-slate-900 ic-dot-grid">

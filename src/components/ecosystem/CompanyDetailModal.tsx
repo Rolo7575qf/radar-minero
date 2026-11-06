@@ -27,7 +27,7 @@ export const CompanyDetailModal: React.FC<CompanyDetailModalProps> = ({
   if (!company) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-800 flex items-start justify-between bg-slate-950/70">

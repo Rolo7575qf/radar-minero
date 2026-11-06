@@ -191,7 +191,7 @@ export const ProjectMap: React.FC<ProjectMapProps> = ({ projects, onSelectProjec
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-800 overflow-hidden">
+      <div className="rounded-2xl border border-slate-800 overflow-hidden relative z-0 isolate">
         <div ref={el} style={{ height: 560, width: '100%', background: '#0b1220' }} />
       </div>
     </div>

@@ -142,7 +142,7 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:justify-end p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[2100] flex items-end sm:items-center justify-center sm:justify-end p-0 sm:p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-slate-950 border border-slate-800 sm:rounded-2xl w-full sm:max-w-xl h-[88vh] sm:h-[calc(100vh-2rem)] flex flex-col shadow-2xl overflow-hidden">
         <div className="relative px-5 py-4 border-b border-slate-800 bg-slate-900 flex items-start justify-between gap-4">
           <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-400" />
