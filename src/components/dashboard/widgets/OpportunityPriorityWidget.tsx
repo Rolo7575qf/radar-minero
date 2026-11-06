@@ -15,15 +15,19 @@ export const OpportunityPriorityWidget: React.FC<OpportunityPriorityWidgetProps>
   onSelectOpportunity,
   onViewAllOpps,
 }) => {
-  const priorityColors: Record<OpportunityPriority, { border: string; bg: string; text: string }> = {
+  const priorityColors: Record<string, { border: string; bg: string; text: string }> = {
     'Máxima': { border: 'border-emerald-500/50', bg: 'bg-emerald-950/40', text: 'text-emerald-400' },
+    'Critica': { border: 'border-emerald-500/50', bg: 'bg-emerald-950/40', text: 'text-emerald-400' },
+    'Crítica': { border: 'border-emerald-500/50', bg: 'bg-emerald-950/40', text: 'text-emerald-400' },
     'Alta': { border: 'border-amber-500/50', bg: 'bg-amber-950/40', text: 'text-amber-400' },
     'Media': { border: 'border-cyan-500/50', bg: 'bg-cyan-950/40', text: 'text-cyan-400' },
     'Baja-media': { border: 'border-slate-700', bg: 'bg-slate-900/40', text: 'text-slate-400' },
   };
 
+  const DEFAULT_CFG = { border: 'border-slate-700', bg: 'bg-slate-900/40', text: 'text-slate-400' };
+
   const priorityCounts: Record<OpportunityPriority, number> = {
-    'Máxima': opportunities.filter(o => o.priority === 'Máxima').length,
+    'Máxima': opportunities.filter(o => o.priority === 'Máxima' || o.priority === ('Critica' as any) || o.priority === ('Crítica' as any)).length,
     'Alta': opportunities.filter(o => o.priority === 'Alta').length,
     'Media': opportunities.filter(o => o.priority === 'Media').length,
     'Baja-media': opportunities.filter(o => o.priority === 'Baja-media').length,
@@ -38,7 +42,7 @@ export const OpportunityPriorityWidget: React.FC<OpportunityPriorityWidgetProps>
       {/* Resumen en 4 bloques de prioridad */}
       <div className="grid grid-cols-4 gap-2">
         {(['Máxima', 'Alta', 'Media', 'Baja-media'] as OpportunityPriority[]).map((p) => {
-          const cfg = priorityColors[p];
+          const cfg = priorityColors[p] || DEFAULT_CFG;
           return (
             <div
               key={p}
@@ -58,7 +62,7 @@ export const OpportunityPriorityWidget: React.FC<OpportunityPriorityWidgetProps>
       {/* Lista de las mejores oportunidades comerciales */}
       <div className="space-y-2.5 overflow-y-auto max-h-[290px] pr-1">
         {topOpportunities.map((opp) => {
-          const cfg = priorityColors[opp.priority];
+          const cfg = priorityColors[opp.priority] || DEFAULT_CFG;
           return (
             <div
               key={opp.id}

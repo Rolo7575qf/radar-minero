@@ -61,7 +61,7 @@ const mapOpportunity = (r) => ({
   targetRfqDate: r.target_rfq_date ?? undefined,
   targetBasis: r.target_basis ?? undefined,
   lastReviewed: r.last_reviewed ?? undefined,
-  priority: r.priority || "Media",
+  priority: (r.priority === "Critica" || r.priority === "Crítica") ? "Máxima" : (r.priority || "Media"),
   confidence: r.confidence || "Media",
   recommendedNextAction: r.recommended_next_action || "",
   commercialStatus: r.commercial_status || "Identificada Tempranamente",

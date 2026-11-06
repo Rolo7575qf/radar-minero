@@ -52,8 +52,10 @@ export const OpportunityBoard: React.FC<OpportunityBoardProps> = ({
     'Descartada / Archivada',
   ];
 
-  const colHeaders = {
+  const colHeaders: Record<string, { title: string; color: string; bar: string }> = {
     'Máxima': { title: 'Prioridad máxima', color: 'text-amber-400', bar: 'bg-amber-400' },
+    'Critica': { title: 'Prioridad máxima', color: 'text-amber-400', bar: 'bg-amber-400' },
+    'Crítica': { title: 'Prioridad máxima', color: 'text-amber-400', bar: 'bg-amber-400' },
     'Alta': { title: 'Prioridad alta', color: 'text-amber-300', bar: 'bg-amber-400/60' },
     'Media': { title: 'Prioridad media', color: 'text-slate-200', bar: 'bg-slate-500' },
     'Baja-media': { title: 'Baja-media', color: 'text-slate-400', bar: 'bg-slate-700' },
