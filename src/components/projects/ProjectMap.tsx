@@ -55,10 +55,13 @@ export const ProjectMap: React.FC<ProjectMapProps> = ({ projects, onSelectProjec
   useEffect(() => {
     if (!el.current || mapRef.current) return;
     const map = L.map(el.current, { zoomControl: true, scrollWheelZoom: true }).setView([-26.5, -69.8], 5);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 12,
     }).addTo(map);
+    // Tono oscuro sobre el mapa base (sin depender de proveedores de pago)
+    const tiles = map.getPane('tilePane');
+    if (tiles) tiles.style.filter = 'invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.5)';
     layerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
     return () => {
