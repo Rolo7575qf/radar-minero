@@ -99,7 +99,7 @@ export const WidgetCard: React.FC<WidgetCardProps> = ({
       </div>
 
       {/* Widget Body */}
-      <div className="p-5 flex-1 flex flex-col justify-center">
+      <div className="p-5 flex-1 flex flex-col justify-start">
         {children}
       </div>
     </div>
