@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, ReactNode } from 'react';
+import React, { useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Satellite, Moon } from 'lucide-react';
 import { SectionHeader } from '../common/SectionHeader';
 import { MiningProject } from '../../types/project';
 
@@ -48,17 +49,45 @@ export const ProjectMap: React.FC<ProjectMapProps> = ({ projects, onSelectProjec
   const el = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
+  const baseTileRef = useRef<L.TileLayer | null>(null);
+  const [layerType, setLayerType] = useState<'dark' | 'satellite'>('dark');
 
   const positions = useMemo(() => spread(projects), [projects]);
   const approxCount = projects.filter(isApprox).length;
 
+  const switchLayer = (type: 'dark' | 'satellite') => {
+    setLayerType(type);
+    const map = mapRef.current;
+    if (!map) return;
+    if (baseTileRef.current) map.removeLayer(baseTileRef.current);
+    const tiles = map.getPane('tilePane');
+    if (type === 'satellite') {
+      if (tiles) tiles.style.filter = 'none';
+      baseTileRef.current = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics',
+          maxZoom: 16,
+        }
+      ).addTo(map);
+    } else {
+      if (tiles) tiles.style.filter = 'invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.5)';
+      baseTileRef.current = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap',
+        maxZoom: 12,
+      }).addTo(map);
+    }
+  };
+
   useEffect(() => {
     if (!el.current || mapRef.current) return;
     const map = L.map(el.current, { zoomControl: true, scrollWheelZoom: true }).setView([-26.5, -69.8], 5);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const initialTile = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 12,
     }).addTo(map);
+    baseTileRef.current = initialTile;
+
     // Tono oscuro sobre el mapa base (sin depender de proveedores de pago)
     const tiles = map.getPane('tilePane');
     if (tiles) tiles.style.filter = 'invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.5)';
@@ -128,17 +157,38 @@ export const ProjectMap: React.FC<ProjectMapProps> = ({ projects, onSelectProjec
 
       {viewToggle}
 
-      <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-400">
-        {GROUPS.map((g) => (
-          <span key={g.id} className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: g.color }} /> {g.label}
-          </span>
-        ))}
-        {approxCount > 0 && (
-          <span className="flex items-center gap-1.5 text-slate-500">
-            <span className="w-2.5 h-2.5 rounded-full border border-dashed border-slate-300" /> Contorno punteado: ubicación referencial por región ({approxCount})
-          </span>
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-400">
+          {GROUPS.map((g) => (
+            <span key={g.id} className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: g.color }} /> {g.label}
+            </span>
+          ))}
+          {approxCount > 0 && (
+            <span className="flex items-center gap-1.5 text-slate-500">
+              <span className="w-2.5 h-2.5 rounded-full border border-dashed border-slate-300" /> Contorno punteado: ubicación referencial por región ({approxCount})
+            </span>
+          )}
+        </div>
+
+        <div className="inline-flex rounded-lg p-0.5 bg-slate-900 border border-slate-800 text-xs">
+          <button
+            onClick={() => switchLayer('dark')}
+            className={`px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1.5 ${
+              layerType === 'dark' ? 'bg-amber-400 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Moon className="w-3.5 h-3.5" /> Mapa Oscuro
+          </button>
+          <button
+            onClick={() => switchLayer('satellite')}
+            className={`px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1.5 ${
+              layerType === 'satellite' ? 'bg-amber-400 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Satellite className="w-3.5 h-3.5" /> Vista Satélite HD
+          </button>
+        </div>
       </div>
 
       <div className="rounded-2xl border border-slate-800 overflow-hidden">

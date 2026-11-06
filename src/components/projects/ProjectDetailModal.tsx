@@ -1,6 +1,7 @@
 import React from 'react';
 import { MiningProject } from '../../types/project';
 import { Badge } from '../common/Badge';
+import { ProjectSatelliteView } from './ProjectSatelliteView';
 import {
   X,
   ExternalLink,
@@ -144,6 +145,9 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               </span>
             </div>
           </div>
+
+          {/* Vista Satelital de la Faena / Monitoreo Aéreo */}
+          <ProjectSatelliteView project={project} />
 
           {/* Ecosistema Involucrado (EPCM, Contratistas) */}
           <div className="p-4 rounded-xl bg-slate-950/50 border border-slate-800 space-y-3">
