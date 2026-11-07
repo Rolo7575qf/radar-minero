@@ -33,11 +33,11 @@ const stageNumber = (p: MiningProject): number => parseInt(p.stage, 10) || 0;
 
 const textOf = (p: MiningProject): string =>
   [
-    p.name,
-    p.ownerCompany,
+    p.name || '',
+    p.ownerCompany || '',
     p.productiveCapacity || '',
     p.locationDetails || '',
-    ...(p.history || []).slice(0, 8).map((h) => `${h.signalTitle} ${h.changeDescription}`),
+    ...(p.history || []).slice(0, 8).map((h) => `${h?.signalTitle || ''} ${h?.changeDescription || ''}`),
   ]
     .join(' ')
     .toLowerCase();

@@ -71,11 +71,12 @@ export const OpportunityBoard: React.FC<OpportunityBoardProps> = ({
 
   const filteredOpportunities = opportunities.filter((opp) => {
     const matchesPriority = selectedPriority === 'Todas' || opp.priority === selectedPriority;
+    const q = (searchTerm || '').toLowerCase();
     const matchesSearch =
-      opp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      opp.targetCompany.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      opp.relatedProjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      opp.potentialNeed.toLowerCase().includes(searchTerm.toLowerCase());
+      String(opp.title || '').toLowerCase().includes(q) ||
+      String(opp.targetCompany || '').toLowerCase().includes(q) ||
+      String(opp.relatedProjectName || '').toLowerCase().includes(q) ||
+      String(opp.potentialNeed || '').toLowerCase().includes(q);
     return matchesPriority && matchesSearch;
   });
 

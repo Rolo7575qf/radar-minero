@@ -94,7 +94,7 @@ export function buildEcosystem(
   for (const a of actors) {
     const aTokens = tokens(a.company);
     const byProject = all.filter(
-      (c) => c.supportedRoles.includes('Titular Minero') && a.projectIds.some((pid) => c.relatedProjectIds.includes(pid))
+      (c) => (c.supportedRoles || []).includes('Titular Minero') && (a.projectIds || []).some((pid) => (c.relatedProjectIds || []).includes(pid))
     );
     const nameMatch = (c: MiningCompany) => tokens(c.name).some((t) => aTokens.includes(t));
     let targets = byProject.filter(nameMatch);

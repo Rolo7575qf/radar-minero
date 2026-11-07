@@ -60,11 +60,12 @@ export const ProjectList: React.FC<ProjectListProps> = ({
     const matchesMineral = selectedMineral === 'Todos' || p.mainMineral === selectedMineral;
     const matchesStage = selectedStage === 'Todas' || p.stage === selectedStage;
     const matchesType = selectedType === 'Todos' || p.submissionType === selectedType;
+    const q = (searchTerm || '').toLowerCase();
     const matchesSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.ownerCompany.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.region.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.epcmCompany && p.epcmCompany.toLowerCase().includes(searchTerm.toLowerCase()));
+      String(p.name || '').toLowerCase().includes(q) ||
+      String(p.ownerCompany || '').toLowerCase().includes(q) ||
+      String(p.region || '').toLowerCase().includes(q) ||
+      String(p.epcmCompany || '').toLowerCase().includes(q);
 
     const matchesRubro = !onlyMyRubro || providerServices.length === 0 || matchedServices(p).length > 0;
     const matchesFollow = !onlyFollowed || followedIds.includes(p.id);

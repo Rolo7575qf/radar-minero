@@ -81,7 +81,7 @@ export const CompanyDetailModal: React.FC<CompanyDetailModalProps> = ({
               Roles y Capacidades en Proyectos:
             </span>
             <div className="flex flex-wrap gap-1.5">
-              {company.supportedRoles.map((role, idx) => (
+              {(company.supportedRoles || []).map((role, idx) => (
                 <span
                   key={idx}
                   className="text-xs px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium"
@@ -100,7 +100,7 @@ export const CompanyDetailModal: React.FC<CompanyDetailModalProps> = ({
             </h3>
 
             <div className="space-y-2.5">
-              {company.contracts.map((cnt) => (
+              {(company.contracts || []).map((cnt) => (
                 <div
                   key={cnt.id}
                   className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5"
@@ -140,7 +140,7 @@ export const CompanyDetailModal: React.FC<CompanyDetailModalProps> = ({
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {company.keyContacts.map((contact, idx) => (
+              {(company.keyContacts || []).map((contact, idx) => (
                 <div
                   key={idx}
                   className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1"

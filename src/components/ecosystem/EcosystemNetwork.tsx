@@ -34,18 +34,20 @@ export const EcosystemNetwork: React.FC<EcosystemNetworkProps> = ({
 
   // Filtramos las relaciones asociadas al proyecto seleccionado o a sus actores
   const projectRelations = relations.filter(
-    (r) => r.sourceId === activeProject.id || r.sourceName.includes(activeProject.name)
+    (r) => activeProject && (r.sourceId === activeProject.id || (r.sourceName && activeProject.name && r.sourceName.includes(activeProject.name)))
   );
 
   // Empresas vinculadas directamente
+  const ownerName = activeProject?.ownerCompany || '';
+  const epcmName = activeProject?.epcmCompany || '';
   const titular = companies.find(
-    (c) => c.name === activeProject.ownerCompany || activeProject.ownerCompany.includes(c.name)
+    (c) => c.name === ownerName || (ownerName && ownerName.includes(c.name))
   );
   const epcm = companies.find(
-    (c) => activeProject.epcmCompany && activeProject.epcmCompany.includes(c.name)
+    (c) => epcmName && epcmName.includes(c.name)
   );
   const contratistas = companies.filter((c) =>
-    activeProject.keyContractors?.some((kc) => kc.includes(c.name))
+    activeProject?.keyContractors?.some((kc) => kc && kc.includes(c.name))
   );
 
   return (

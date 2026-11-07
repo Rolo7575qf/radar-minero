@@ -49,11 +49,12 @@ export const SignalFeed: React.FC<SignalFeedProps> = ({
     const matchesCat = selectedCategory === 'Todas' || s.category === selectedCategory;
     const matchesSrc = selectedSource === 'Todas' || s.originalSource === selectedSource;
     const matchesRel = selectedRelevance === 'Todas' || s.relevance === selectedRelevance;
+    const q = (searchTerm || '').toLowerCase();
     const matchesSearch =
-      s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.relatedProjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.commercialInterpretation.hypothesis.toLowerCase().includes(searchTerm.toLowerCase());
+      String(s.name || '').toLowerCase().includes(q) ||
+      String(s.relatedProjectName || '').toLowerCase().includes(q) ||
+      String(s.description || '').toLowerCase().includes(q) ||
+      String(s.commercialInterpretation?.hypothesis || '').toLowerCase().includes(q);
     return matchesCat && matchesSrc && matchesRel && matchesSearch;
   });
 

@@ -35,11 +35,11 @@ export const CompanyList: React.FC<CompanyListProps> = ({
   ];
 
   const filteredCompanies = companies.filter((c) => {
-    const matchesRole = selectedRole === 'Todos' || c.primaryRole === selectedRole || c.supportedRoles.includes(selectedRole as CompanyRole);
+    const matchesRole = selectedRole === 'Todos' || c.primaryRole === selectedRole || (c.supportedRoles || []).includes(selectedRole as CompanyRole);
     const matchesSearch =
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.countryOrigin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.description.toLowerCase().includes(searchTerm.toLowerCase());
+      String(c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(c.countryOrigin || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(c.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesRole && matchesSearch;
   });
 
@@ -138,7 +138,7 @@ export const CompanyList: React.FC<CompanyListProps> = ({
             <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
               <span className="flex items-center gap-1 text-slate-400 text-[11px]">
                 <Users className="w-3.5 h-3.5 text-emerald-400" />
-                <strong className="text-slate-300">{c.keyContacts.length}</strong> decisores
+                <strong className="text-slate-300">{(c.keyContacts || []).length}</strong> decisores
               </span>
 
               <span className="text-indigo-400 font-semibold flex items-center gap-0.5 group-hover:translate-x-1 transition text-[11px]">

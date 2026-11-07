@@ -24,7 +24,7 @@ export const SERVICE_CATALOG: ServiceCategory[] = [
 ];
 
 const normalize = (s: string) =>
-  s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 // Devuelve los ids de categorías que el texto menciona.
 export function detectCategories(text: string): string[] {
