@@ -65,19 +65,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* País */}
+          {/* País — solo Chile por ahora; agregar Perú/Argentina cuando corresponda */}
           <div className="hidden sm:flex items-center border border-slate-800 rounded-[6px] p-0.5 text-[11px]">
-            {(['Todos', 'Chile', 'Perú', 'Argentina'] as const).map((country) => (
-              <button
-                key={country}
-                onClick={() => onSelectCountry(country)}
-                className={`px-2.5 py-1 rounded-[4px] font-bold transition ${
-                  selectedCountry === country ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                {country === 'Todos' ? 'LatAm' : country}
-              </button>
-            ))}
+            <span className="px-2.5 py-1 rounded-[4px] font-bold bg-amber-400 text-slate-950">
+              Chile
+            </span>
           </div>
 
           {/* Estado de datos */}
