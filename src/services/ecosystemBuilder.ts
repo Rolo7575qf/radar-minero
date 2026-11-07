@@ -51,7 +51,7 @@ export function buildEcosystem(
         c.relatedProjectIds.push(project.id);
         c.participatingProjectsCount = c.relatedProjectIds.length;
       }
-      project.informationSources.forEach((s) => {
+      (project.informationSources || []).forEach((s) => {
         if (!c!.verifiedSources.includes(s)) c!.verifiedSources.push(s);
       });
       const key = `${project.id}|${id}|${relation}`;

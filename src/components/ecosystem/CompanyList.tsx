@@ -34,12 +34,15 @@ export const CompanyList: React.FC<CompanyListProps> = ({
     'Consultora Ambiental y Permisos',
   ];
 
-  const filteredCompanies = companies.filter((c) => {
+  const q = (searchTerm || '').toLowerCase();
+  const filteredCompanies = (companies || []).filter((c) => {
+    if (!c) return false;
     const matchesRole = selectedRole === 'Todos' || c.primaryRole === selectedRole || (c.supportedRoles || []).includes(selectedRole as CompanyRole);
     const matchesSearch =
-      String(c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      String(c.countryOrigin || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      String(c.description || '').toLowerCase().includes(searchTerm.toLowerCase());
+      !q ||
+      String(c.name || '').toLowerCase().includes(q) ||
+      String(c.countryOrigin || '').toLowerCase().includes(q) ||
+      String(c.description || '').toLowerCase().includes(q);
     return matchesRole && matchesSearch;
   });
 
