@@ -13,8 +13,13 @@ import {
   TrendingUp,
   Sliders,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Printer
 } from 'lucide-react';
+import { Actor } from '../../types/company';
+import { MiningProject } from '../../types/project';
+import { ClientBrand } from '../brand/ICSeal';
+import { dossierPdfService } from '../../services/dossierPdfService';
 
 interface OpportunityDetailModalProps {
   opportunity: CommercialOpportunity | null;
@@ -22,6 +27,9 @@ interface OpportunityDetailModalProps {
   onOpenProject?: (projectId: string) => void;
   onOpenScoringConfig?: () => void;
   onUpdate?: (id: string, patch: { status?: CommercialStatus; note?: string }) => void;
+  actors?: Actor[];
+  project?: MiningProject | null;
+  brand?: ClientBrand;
 }
 
 const STATUSES: CommercialStatus[] = [
@@ -41,6 +49,9 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
   onOpenProject,
   onOpenScoringConfig,
   onUpdate,
+  actors = [],
+  project,
+  brand,
 }) => {
   const [note, setNote] = useState('');
   useEffect(() => {
@@ -396,12 +407,21 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           <span className="text-xs text-slate-500">
             Detección: {opportunity.detectionDate} · Confianza: {opportunity.confidence}
           </span>
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
-          >
-            Cerrar Ficha
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => dossierPdfService.exportOpportunityDossier(opportunity, project, actors, brand)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-amber-400/50 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 transition"
+              title="Generar Dossier Ejecutivo PDF de esta oportunidad"
+            >
+              <Printer size={13} /> Dossier PDF
+            </button>
+            <button
+              onClick={onClose}
+              className="px-5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
+            >
+              Cerrar Ficha
+            </button>
+          </div>
         </div>
       </div>
     </div>

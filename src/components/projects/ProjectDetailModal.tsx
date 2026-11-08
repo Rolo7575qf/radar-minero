@@ -2,6 +2,10 @@ import React from 'react';
 import { MiningProject } from '../../types/project';
 import { Badge } from '../common/Badge';
 import { ProjectSatelliteView } from './ProjectSatelliteView';
+import { Actor } from '../../types/company';
+import { CommercialOpportunity } from '../../types/opportunity';
+import { ClientBrand } from '../brand/ICSeal';
+import { dossierPdfService } from '../../services/dossierPdfService';
 import {
   X,
   ExternalLink,
@@ -15,7 +19,8 @@ import {
   ShieldCheck,
   FileText,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Printer
 } from 'lucide-react';
 
 interface ProjectDetailModalProps {
@@ -23,6 +28,9 @@ interface ProjectDetailModalProps {
   onClose: () => void;
   onSelectCompanyByName?: (name: string) => void;
   onGenerateBrief?: (project: MiningProject) => void;
+  actors?: Actor[];
+  opportunities?: CommercialOpportunity[];
+  brand?: ClientBrand;
 }
 
 export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
@@ -30,6 +38,9 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   onClose,
   onSelectCompanyByName,
   onGenerateBrief,
+  actors = [],
+  opportunities = [],
+  brand,
 }) => {
   if (!project) return null;
 
@@ -273,6 +284,13 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
             Última actualización sincronizada: {project.lastUpdateDate}
           </span>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => dossierPdfService.exportProjectDossier(project, actors, opportunities, brand)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-amber-400/50 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 transition"
+              title="Generar y descargar Dossier Ejecutivo en PDF listo para imprimir o presentar"
+            >
+              <Printer size={13} /> Dossier PDF
+            </button>
             {onGenerateBrief && (
               <button
                 onClick={() => onGenerateBrief(project)}

@@ -785,6 +785,9 @@ export const App: React.FC = () => {
               setSelectedCompany(c);
             }
           }}
+          actors={actors}
+          opportunities={opportunities}
+          brand={clientBrand}
         />
       )}
 
@@ -818,6 +821,9 @@ export const App: React.FC = () => {
             setSelectedOpportunity(null);
             setIsScoringConfigOpen(true);
           }}
+          actors={actors}
+          project={projects.find(p => p.id === selectedOpportunity?.relatedProjectId) || null}
+          brand={clientBrand}
         />
       )}
     </div>
