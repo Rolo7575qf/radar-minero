@@ -15,6 +15,7 @@ interface Props {
   onOpenScoringGuide: () => void;
   onRestoreDefaults: () => void;
   onOpenAdminPanel?: () => void;
+  isAdmin?: boolean;
 }
 
 // Reduce el logo a un tamaño liviano para guardarlo en el espacio de trabajo del usuario
@@ -43,7 +44,7 @@ async function resizeLogo(file: File): Promise<string> {
 
 export const AccountModal: React.FC<Props> = ({
   isOpen, onClose, email, brand, onSaveBrand, providerServices,
-  onOpenProviderProfile, onOpenScoringConfig, onOpenScoringGuide, onRestoreDefaults, onOpenAdminPanel,
+  onOpenProviderProfile, onOpenScoringConfig, onOpenScoringGuide, onRestoreDefaults, onOpenAdminPanel, isAdmin,
 }) => {
   const [name, setName] = useState(brand.name || '');
   const [logo, setLogo] = useState<string | undefined>(brand.logo);
@@ -125,7 +126,7 @@ export const AccountModal: React.FC<Props> = ({
           </div>
 
           <div className="mt-6">
-            {email === 'roloquinonesf@gmail.com' && onOpenAdminPanel && (
+            {(isAdmin || email === 'roloquinonesf@gmail.com') && onOpenAdminPanel && (
               <Row icon={<ShieldAlert className="w-4 h-4 text-amber-400" strokeWidth={1.5} />} title="Panel Central de Licencias (SuperAdmin)"
                 desc="Gestión central de clientes B2B, activación/desactivación de licencias, rubros y países."
                 action={<button className="px-3 py-1.5 rounded-[6px] bg-amber-400 text-slate-950 font-bold text-xs hover:bg-amber-300 transition" onClick={() => { onClose(); onOpenAdminPanel(); }}>Abrir Panel</button>} />

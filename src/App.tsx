@@ -121,7 +121,8 @@ export const App: React.FC = () => {
   const [showCurtain, setShowCurtain] = useState<boolean>(() => {
     try { return sessionStorage.getItem('radar_curtain_seen') !== '1'; } catch { return true; }
   });
-  const isAdmin = userEmail === 'roloquinonesf@gmail.com';
+  const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const isAdmin = userEmail === 'roloquinonesf@gmail.com' || isLocalDev;
   const [navCollapsed, setNavCollapsed] = useState<boolean>(() => {
     try { return localStorage.getItem('radar_nav_collapsed') === '1'; } catch { return false; }
   });
@@ -697,6 +698,7 @@ export const App: React.FC = () => {
           onOpenScoringGuide={() => { setIsAccountOpen(false); setActiveTab('scoring'); }}
           onRestoreDefaults={handleRestoreDefaults}
           onOpenAdminPanel={() => setIsAdminControlPanelOpen(true)}
+          isAdmin={isAdmin}
         />
       )}
 
