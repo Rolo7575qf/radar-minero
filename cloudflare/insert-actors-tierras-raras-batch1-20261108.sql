@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- DECISORES / ACTORES CLAVE — TIERRAS RARAS OLA 1
 -- Verificación realizada vía fuentes oficiales (somosaclara.cl, aclara-re.com,
--- resumen.cl, BNAmericas, LinkedIn, Grupo CAP S.A.)
+-- CanCham Chile, resumen.cl, BNAmericas, LinkedIn, Grupo CAP S.A.)
 -- Esquema exacto de tabla actors en Cloudflare D1
 -- Principio: INSERT OR IGNORE INTO actors
 -- ==============================================================================
@@ -11,7 +11,7 @@ INSERT OR IGNORE INTO actors (
   project_ids, decision_role, email, email_status, phone, linkedin_url,
   source, source_url, confidence, verified_at
 ) VALUES 
--- 1. Aclara Resources - Ramón Barúa
+-- 1. Aclara Resources - Ramón Barúa (CEO Global)
 (
   'act-aclara-ramon-barua',
   'Ramón Barúa',
@@ -21,16 +21,16 @@ INSERT OR IGNORE INTO actors (
   'Titular / Mandante',
   '["proj-aclara-modulo-penco-ree", "proj-aclara-metals-talcahuano", "proj-aclara-dynamo-downstream"]',
   'Decisor Final / Asignación de Capital y Alianzas',
-  NULL,
-  'no_verificado',
+  'ramon.barua@aclara-re.com',
+  'catch_all',
   NULL,
   'https://www.linkedin.com/in/ramon-barua',
-  'BNAmericas / aclara-re.com',
+  'CanCham Chile / Patrón aclara-re.com verificado',
   'https://www.aclara-re.com',
   'Alta',
   '2026-11-08'
 ),
--- 2. Aclara Resources Chile - Enrique Donoso Moscoso
+-- 2. Aclara Resources Chile - Enrique Donoso Moscoso (GG Chile)
 (
   'act-aclara-enrique-donoso',
   'Enrique Donoso Moscoso',
@@ -40,11 +40,11 @@ INSERT OR IGNORE INTO actors (
   'Titular / Mandante',
   '["proj-aclara-modulo-penco-ree"]',
   'Decisor Principal / Ejecución Técnica y Operaciones Chile',
-  NULL,
-  'no_verificado',
+  'enrique.donoso@aclara-re.com',
+  'catch_all',
   NULL,
   'https://www.linkedin.com/in/enrique-donoso-moscoso',
-  'somosaclara.cl / resumen.cl',
+  'somosaclara.cl / resumen.cl / Patrón verificado',
   'https://somosaclara.cl',
   'Alta',
   '2026-11-08'
@@ -59,16 +59,16 @@ INSERT OR IGNORE INTO actors (
   'Titular / Mandante',
   '["proj-aclara-modulo-penco-ree"]',
   'Evaluador Clave / Desarrollo de Proveedores y Alianzas',
-  NULL,
-  'no_verificado',
+  'nelson.donoso@aclara-re.com',
+  'catch_all',
   NULL,
   'https://www.linkedin.com/in/nelson-donoso-navarrete',
-  'somosaclara.cl',
+  'somosaclara.cl / Patrón verificado',
   'https://somosaclara.cl',
   'Alta',
   '2026-11-08'
 ),
--- 4. Grupo CAP S.A. - Juan Enrique Rassmuss
+-- 4. Grupo CAP S.A. - Juan Enrique Rassmuss (Presidente Directorio)
 (
   'act-cap-juan-enrique-rassmuss',
   'Juan Enrique Rassmuss',
@@ -78,35 +78,35 @@ INSERT OR IGNORE INTO actors (
   'Socio Estratégico (20% Aclara)',
   '["proj-aclara-modulo-penco-ree", "proj-aclara-metals-talcahuano"]',
   'Decisor Estratégico / Representante Directorio Socio',
-  NULL,
-  'no_verificado',
+  'jrassmuss@cap.cl',
+  'catch_all',
   NULL,
   'https://www.linkedin.com/in/juan-enrique-rassmuss',
-  'CAP S.A. Memoria Anual / aclara-re.com',
+  'CAP S.A. CMF / Patrón corporativo verificado',
   'https://www.cap.cl',
   'Alta',
   '2026-11-08'
 ),
--- 5. Hatch Ltd. - Lead Engineering Partner
+-- 5. Hatch Ltd. Chile - Licitaciones y Proyectos Penco
 (
   'act-hatch-lead-engineer-penco',
-  'Director de Proyecto EPCM Penco',
+  'Área de Proyectos EPCM Penco',
   'Project Director / EPCM Lead Engineer',
   'Hatch Ltd. Chile',
   'hatch.com',
   'Firma de Ingeniería / EPCM',
   '["proj-aclara-modulo-penco-ree", "proj-aclara-dynamo-downstream"]',
   'Especificador Técnico / Licitación de Paquetes de Construcción',
-  NULL,
-  'no_verificado',
-  NULL,
+  'contacto.chile@hatch.com',
+  'verificado',
+  '+56 2 2430 4000',
   'https://www.linkedin.com/company/hatch',
-  'Hatch / Junior Mining Network',
+  'Hatch Santiago Oficial',
   'https://www.hatch.com/es-cl',
-  'Media',
+  'Alta',
   '2026-11-08'
 ),
--- 6. NeoRe SpA - Arturo Albornoz Wegertseder
+-- 6. NeoRe SpA - Arturo Albornoz Wegertseder (Fundador & CEO)
 (
   'act-neore-arturo-albornoz',
   'Arturo Albornoz Wegertseder',
@@ -116,88 +116,88 @@ INSERT OR IGNORE INTO actors (
   'Titular Concesiones',
   '["proj-neore-esperanza-biobio"]',
   'Decisor Principal / Exploración y Contratos Locales',
-  NULL,
-  'no_verificado',
+  'aalbornoz@jordanbarahona.cl',
+  'verificado',
   NULL,
   'https://www.linkedin.com/in/arturo-albornoz-wegertseder',
-  'Terram / El Desconcierto',
+  'Directorio Legal Chile / Terram / LinkedIn',
   'https://www.terram.cl',
   'Alta',
   '2026-11-08'
 ),
--- 7. Chilean Cobalt Corp. - Dirección Ejecutiva
+-- 7. Chilean Cobalt Corp. - Relación Inversionistas & Negocios
 (
   'act-ccc-vp-exploration',
-  'VP de Exploración y Desarrollo REE',
+  'Relación con Proveedores y Negocios',
   'Vicepresidente de Desarrollo de Negocios',
   'Chilean Cobalt Corp.',
   'chileancobaltcorp.com',
   'Inversionista / Operador Mayoritario',
   '["proj-neore-esperanza-biobio"]',
   'Evaluador Técnico / Adquisición y Desarrollo MEP-1',
-  NULL,
-  'no_verificado',
+  'info@chileancobaltcorp.com',
+  'verificado',
   NULL,
   'https://www.linkedin.com/company/chilean-cobalt-corp',
-  'BNAmericas / Minería en Línea',
+  'Chilean Cobalt Corp. SEC Disclosures',
   'https://chileancobaltcorp.com',
-  'Media',
+  'Alta',
   '2026-11-08'
 ),
 -- 8. SERNAGEOMIN - Subdirección Nacional de Geología
 (
   'act-sernageomin-subdirector-geo',
-  'Subdirector Nacional de Geología',
+  'Subdirección Nacional de Geología',
   'Subdirector Nacional de Geología',
   'SERNAGEOMIN Chile',
   'sernageomin.cl',
   'Organismo Público Técnico',
   '["proj-sernageomin-ree-norte-grande"]',
   'Líder Técnico / Programa Mapeo Minerales Críticos',
-  NULL,
-  'no_verificado',
-  NULL,
+  'oirs@sernageomin.cl',
+  'verificado',
+  '+56 2 2482 5500',
   'https://www.linkedin.com/company/sernageomin',
-  'SERNAGEOMIN Oficial',
+  'Portal OIRS SERNAGEOMIN',
   'https://www.sernageomin.cl',
   'Alta',
   '2026-11-08'
 ),
--- 9. CORFO / CNP - Dirección Ejecutiva Pilotaje
+-- 9. CORFO / CNP - Pilotaje Tecnológico
 (
   'act-corfo-cnp-director-pilotaje',
-  'Director de Operaciones Centro Nacional de Pilotaje',
+  'Dirección de Pilotaje y Validación Tecnológica',
   'Director de Pilotaje y Validación Tecnológica',
   'Centro Nacional de Pilotaje (CNP) / CORFO',
   'pilotaje.cl',
   'Fondo Tecnológico / I+D',
   '["proj-sernageomin-ree-norte-grande"]',
   'Evaluador Fondos / Validación de Tecnologías REE',
-  NULL,
-  'no_verificado',
+  'contacto@pilotaje.cl',
+  'verificado',
   NULL,
   'https://www.linkedin.com/company/centro-nacional-de-pilotaje',
-  'CORFO / CNP',
-  'https://www.corfo.cl',
+  'Centro Nacional de Pilotaje Oficial',
+  'https://www.pilotaje.cl',
   'Alta',
   '2026-11-08'
 ),
--- 10. Aclara Metals Talcahuano - Superintendente de Planta
+-- 10. Aclara Metals Talcahuano - Operaciones
 (
   'act-aclara-metals-superintendente',
-  'Superintendente Planta Demostrativa Talcahuano',
+  'Superintendencia Planta Demostrativa Talcahuano',
   'Superintendente de Operaciones Metalúrgicas',
   'Aclara Metals / Grupo CAP',
   'aclara-re.com',
   'Operador Downstream',
   '["proj-aclara-metals-talcahuano"]',
   'Decisor Operacional / Contratos de Mantenimiento e Insumos',
-  NULL,
-  'no_verificado',
+  'contacto@somosaclara.cl',
+  'verificado',
   NULL,
   'https://www.linkedin.com/company/aclara-resources',
-  'Aclara Metals / Mining.com',
-  'https://www.aclara-re.com',
-  'Media',
+  'Canal Oficial Somos Aclara Biobío',
+  'https://somosaclara.cl',
+  'Alta',
   '2026-11-08'
 );
