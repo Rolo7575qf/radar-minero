@@ -98,12 +98,19 @@ export const App: React.FC = () => {
   );
   const sources = useMemo(() => [...new Set(signals.map((sg) => sg.originalSource).filter(Boolean))], [signals]);
   const lastSignalDate = useMemo(() => {
-    const dates = signals.map((sg) => sg.publishedDate).filter(Boolean).sort();
+    const dates: string[] = [];
+    signals.forEach((sg) => { if (sg.publishedDate) dates.push(sg.publishedDate); });
+    projects.forEach((p) => {
+      if (p.lastUpdateDate) dates.push(p.lastUpdateDate);
+      (p.history || []).forEach((h) => { if (h.date) dates.push(h.date); });
+    });
+    rawOpportunities.forEach((o) => { if (o.detectionDate) dates.push(o.detectionDate); });
+    dates.sort();
     const d = dates[dates.length - 1];
     if (!d) return '';
     const [y, m, day] = d.split('-');
     return day && m ? `${day}-${m}` : d;
-  }, [signals]);
+  }, [signals, projects, rawOpportunities]);
   const [actors, setActors] = useState<Actor[]>([]);
   const { companies, relations } = useMemo(() => buildEcosystem(projects, opportunities, actors), [projects, opportunities, actors]);
   const [dashboards, setDashboards] = useState<DashboardConfig[]>([]);
@@ -163,7 +170,7 @@ export const App: React.FC = () => {
       if (synced) {
         if (synced.projects) { projs = synced.projects; setProjects(projs); }
         if (synced.signals) { sigs = synced.signals; setSignals(sigs); }
-        if (synced.opportunities) { opps = synced.opportunities; }
+        if (synced.opportunities) { opps = synced.opportunities; setOpportunities(opps); }
       }
 
       // Espacio de trabajo del usuario (pipeline, ponderaciones, dashboards) desde D1
