@@ -53,7 +53,7 @@ export const CapexTableWidget: React.FC<CapexTableWidgetProps> = ({
                   <div className="text-[10px] text-slate-400">{p.region}</div>
                 </td>
                 <td className="py-2.5 pr-3">
-                  <Badge variant={p.mainMineral === 'Litio' ? 'cyan' : 'amber'} size="sm">
+                  <Badge variant={p.mainMineral === 'Litio' ? 'cyan' : p.mainMineral?.toLowerCase().includes('tierras raras') ? 'purple' : 'amber'} size="sm">
                     {p.mainMineral}
                   </Badge>
                 </td>

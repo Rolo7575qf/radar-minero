@@ -52,12 +52,15 @@ export const ProjectList: React.FC<ProjectListProps> = ({
   const projectNeeds = (p: MiningProject) => detectCategories(projectText(p));
   const matchedServices = (p: MiningProject) => projectNeeds(p).filter((c) => providerServices.includes(c));
 
-  const MINERALS = ['Todos', 'Cobre', 'Litio', 'Oro', 'Molibdeno', 'Hierro'];
+  const MINERALS = ['Todos', 'Cobre', 'Litio', 'Tierras Raras', 'Oro', 'Molibdeno', 'Hierro', 'Polimetálico'];
   const TYPES = ['Todos', 'EIA', 'DIA'];
 
   const filteredProjects = projects.filter((p) => {
     const matchesCountry = selectedCountry === 'Todos' || p.country === selectedCountry;
-    const matchesMineral = selectedMineral === 'Todos' || p.mainMineral === selectedMineral;
+    const matchesMineral =
+      selectedMineral === 'Todos' ||
+      p.mainMineral === selectedMineral ||
+      (p.mainMineral && p.mainMineral.toLowerCase().includes(selectedMineral.toLowerCase()));
     const matchesStage = selectedStage === 'Todas' || p.stage === selectedStage;
     const matchesType = selectedType === 'Todos' || p.submissionType === selectedType;
     const q = (searchTerm || '').toLowerCase();

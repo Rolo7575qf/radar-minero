@@ -24,7 +24,9 @@ export type MineralType =
   | 'Hierro'
   | 'Plata'
   | 'Polimetálico'
-  | 'Potasio';
+  | 'Potasio'
+  | 'Tierras Raras'
+  | 'Minerales Críticos';
 
 export type ProjectType = 'Greenfield' | 'Brownfield';
 

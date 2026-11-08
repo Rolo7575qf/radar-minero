@@ -18,7 +18,16 @@ export const PieDistributionWidget: React.FC<PieDistributionWidgetProps> = ({
   projects.forEach((p) => {
     let key = 'Otros';
     if (dimension === 'country') key = p.country;
-    else if (dimension === 'mineral') key = p.mainMineral;
+    else if (dimension === 'mineral') {
+      const m = p.mainMineral || 'Otros';
+      if (m.toLowerCase().includes('tierras raras')) key = 'Tierras Raras';
+      else if (m.toLowerCase().includes('cobre')) key = 'Cobre';
+      else if (m.toLowerCase().includes('litio')) key = 'Litio';
+      else if (m.toLowerCase().includes('oro')) key = 'Oro';
+      else if (m.toLowerCase().includes('hierro')) key = 'Hierro';
+      else if (m.toLowerCase().includes('molibdeno')) key = 'Molibdeno';
+      else key = m;
+    }
     else if (dimension === 'project_type') key = p.projectType;
 
     counts[key] = (counts[key] || 0) + 1;
