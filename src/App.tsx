@@ -21,6 +21,7 @@ import { OpportunityBoard } from './components/opportunities/OpportunityBoard';
 import { OpportunityDetailModal } from './components/opportunities/OpportunityDetailModal';
 import { ScoringConfigModal } from './components/opportunities/ScoringConfigModal';
 import { ProviderProfileModal } from './components/opportunities/ProviderProfileModal';
+import { AdminControlPanelModal } from './components/admin/AdminControlPanelModal';
 import { detectCategories, serviceLabel } from './data/serviceCatalog';
 import { AssistantPanel } from './components/assistant/AssistantPanel';
 
@@ -135,6 +136,7 @@ export const App: React.FC = () => {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isScoringConfigOpen, setIsScoringConfigOpen] = useState(false);
+  const [isAdminControlPanelOpen, setIsAdminControlPanelOpen] = useState(false);
 
   const [selectedProject, setSelectedProject] = useState<MiningProject | null>(null);
   const [selectedSignal, setSelectedSignal] = useState<EarlySignal | null>(null);
@@ -412,6 +414,8 @@ export const App: React.FC = () => {
         sources={sources}
         clientBrand={clientBrand}
         onOpenAccount={() => setIsAccountOpen(true)}
+        isAdmin={isAdmin}
+        onOpenAdminPanel={() => setIsAdminControlPanelOpen(true)}
         collapsed={navCollapsed}
         onToggleCollapsed={toggleNav}
       />
@@ -425,6 +429,8 @@ export const App: React.FC = () => {
           onSearchChange={setSearchQuery}
           onOpenAccount={() => setIsAccountOpen(true)}
           onOpenSignalSimulator={isAdmin ? () => setIsSimulatorOpen(true) : undefined}
+          isAdmin={isAdmin}
+          onOpenAdminPanel={() => setIsAdminControlPanelOpen(true)}
           userEmail={userEmail}
           clientBrand={clientBrand}
           projectsCount={projects.length}
@@ -670,6 +676,14 @@ export const App: React.FC = () => {
         />
       )}
 
+      {isAdminControlPanelOpen && (
+        <AdminControlPanelModal
+          isOpen={isAdminControlPanelOpen}
+          onClose={() => setIsAdminControlPanelOpen(false)}
+          adminEmail={userEmail}
+        />
+      )}
+
       {isAccountOpen && (
         <AccountModal
           isOpen={isAccountOpen}
@@ -682,6 +696,7 @@ export const App: React.FC = () => {
           onOpenScoringConfig={() => { setIsAccountOpen(false); setIsScoringConfigOpen(true); }}
           onOpenScoringGuide={() => { setIsAccountOpen(false); setActiveTab('scoring'); }}
           onRestoreDefaults={handleRestoreDefaults}
+          onOpenAdminPanel={() => setIsAdminControlPanelOpen(true)}
         />
       )}
 

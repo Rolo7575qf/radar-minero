@@ -361,6 +361,136 @@ var worker_default = {
       }
     }
 
+    // --- Verificación de licencia del usuario autenticado ---
+    if (url.pathname === "/api/license/me") {
+      if (!userEmail) return json({ isSuperAdmin: false, status: "sin_sesion" });
+      if (userEmail === "roloquinonesf@gmail.com") {
+        return json({
+          isSuperAdmin: true,
+          status: "activa",
+          companyName: "InteligenciaConectada™ SuperAdmin",
+          plan: "Master Central Admin",
+          countries: ["Chile", "Perú", "Argentina", "Colombia"],
+          rubros: ["Minería", "Energía & Renovables", "Infraestructura & Construcción", "Celulosa & Forestal"]
+        });
+      }
+      try {
+        const { results } = await env.DB.prepare("SELECT * FROM client_licenses").all();
+        const found = (results || []).find((r) => {
+          if (r.contact_email?.toLowerCase() === userEmail.toLowerCase()) return true;
+          const allowed = j(r.allowed_emails, []);
+          return allowed.some((entry) => {
+            if (entry.startsWith("@")) return userEmail.toLowerCase().endsWith(entry.toLowerCase());
+            return entry.toLowerCase() === userEmail.toLowerCase();
+          });
+        });
+        if (found) {
+          return json({
+            isSuperAdmin: false,
+            status: found.status,
+            companyName: found.company_name,
+            plan: found.plan,
+            countries: j(found.countries, ["Chile"]),
+            rubros: j(found.rubros, ["Minería"]),
+            expiryDate: found.expiry_date || null
+          });
+        }
+        return json({ isSuperAdmin: false, status: "sin_licencia" });
+      } catch {
+        // Si la tabla aún no se ha creado en D1, permitir acceso de cortesía
+        return json({ isSuperAdmin: false, status: "activa", countries: ["Chile"], rubros: ["Minería"] });
+      }
+    }
+
+    // --- Panel de Control del Administrador Central (Exclusivo roloquinonesf@gmail.com) ---
+    if (url.pathname === "/api/admin/licenses" || url.pathname.startsWith("/api/admin/licenses/")) {
+      if (userEmail !== "roloquinonesf@gmail.com") {
+        return json({ error: "Acceso denegado: panel exclusivo para Administrador Central IC" }, 403);
+      }
+      try {
+        if (request.method === "GET") {
+          const { results } = await env.DB.prepare("SELECT * FROM client_licenses ORDER BY company_name ASC").all();
+          const mapped = (results || []).map((r) => ({
+            id: r.id,
+            companyName: r.company_name,
+            contactName: r.contact_name,
+            contactEmail: r.contact_email,
+            allowedEmails: j(r.allowed_emails, []),
+            status: r.status,
+            plan: r.plan,
+            countries: j(r.countries, ["Chile"]),
+            rubros: j(r.rubros, ["Minería"]),
+            maxUsers: r.max_users || 5,
+            startDate: r.start_date,
+            expiryDate: r.expiry_date || null,
+            notes: r.notes || null,
+            createdAt: r.created_at,
+            updatedAt: r.updated_at
+          }));
+          return json(mapped);
+        }
+
+        if (request.method === "POST") {
+          const body = await request.json();
+          await env.DB.prepare(`
+            INSERT INTO client_licenses (id, company_name, contact_name, contact_email, allowed_emails, status, plan, countries, rubros, max_users, start_date, expiry_date, notes, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(id) DO UPDATE SET
+              company_name = excluded.company_name,
+              contact_name = excluded.contact_name,
+              contact_email = excluded.contact_email,
+              allowed_emails = excluded.allowed_emails,
+              status = excluded.status,
+              plan = excluded.plan,
+              countries = excluded.countries,
+              rubros = excluded.rubros,
+              max_users = excluded.max_users,
+              start_date = excluded.start_date,
+              expiry_date = excluded.expiry_date,
+              notes = excluded.notes,
+              updated_at = CURRENT_TIMESTAMP
+          `).bind(
+            body.id,
+            body.companyName,
+            body.contactName || body.companyName,
+            body.contactEmail,
+            JSON.stringify(body.allowedEmails || []),
+            body.status || "activa",
+            body.plan || "Enterprise B2B",
+            JSON.stringify(body.countries || ["Chile"]),
+            JSON.stringify(body.rubros || ["Minería"]),
+            body.maxUsers || 5,
+            body.startDate || new Date().toISOString().split("T")[0],
+            body.expiryDate || null,
+            body.notes || null
+          ).run();
+          return json({ ok: true });
+        }
+
+        if (request.method === "PATCH" && url.pathname.endsWith("/status")) {
+          const parts = url.pathname.split("/");
+          const id = decodeURIComponent(parts[parts.length - 2]);
+          const { status } = await request.json();
+          await env.DB.prepare("UPDATE client_licenses SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").bind(status, id).run();
+          return json({ ok: true });
+        }
+
+        if (request.method === "DELETE") {
+          const parts = url.pathname.split("/");
+          const id = decodeURIComponent(parts[parts.length - 1]);
+          if (id === "lic-ic-master") {
+            return json({ error: "No es posible eliminar la licencia Maestra de InteligenciaConectada™" }, 400);
+          }
+          await env.DB.prepare("DELETE FROM client_licenses WHERE id = ?").bind(id).run();
+          return json({ ok: true });
+        }
+
+        return json({ error: "Método no permitido" }, 405);
+      } catch (err) {
+        return json({ error: "Error procesando solicitud de licencias: " + (err && err.message) }, 500);
+      }
+    }
+
     if (url.pathname === "/api/projects") {
       try {
         const [p, s, h] = await env.DB.batch([

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { X, Upload, Trash2, Briefcase, Sliders, RotateCcw, Image as ImageIcon, BookOpen } from 'lucide-react';
+import { X, Upload, Trash2, Briefcase, Sliders, RotateCcw, Image as ImageIcon, BookOpen, ShieldAlert } from 'lucide-react';
 import { ClientBrand } from '../brand/ICSeal';
 import { serviceLabel } from '../../data/serviceCatalog';
 
@@ -14,6 +14,7 @@ interface Props {
   onOpenScoringConfig: () => void;
   onOpenScoringGuide: () => void;
   onRestoreDefaults: () => void;
+  onOpenAdminPanel?: () => void;
 }
 
 // Reduce el logo a un tamaño liviano para guardarlo en el espacio de trabajo del usuario
@@ -42,7 +43,7 @@ async function resizeLogo(file: File): Promise<string> {
 
 export const AccountModal: React.FC<Props> = ({
   isOpen, onClose, email, brand, onSaveBrand, providerServices,
-  onOpenProviderProfile, onOpenScoringConfig, onOpenScoringGuide, onRestoreDefaults,
+  onOpenProviderProfile, onOpenScoringConfig, onOpenScoringGuide, onRestoreDefaults, onOpenAdminPanel,
 }) => {
   const [name, setName] = useState(brand.name || '');
   const [logo, setLogo] = useState<string | undefined>(brand.logo);
@@ -124,6 +125,11 @@ export const AccountModal: React.FC<Props> = ({
           </div>
 
           <div className="mt-6">
+            {email === 'roloquinonesf@gmail.com' && onOpenAdminPanel && (
+              <Row icon={<ShieldAlert className="w-4 h-4 text-amber-400" strokeWidth={1.5} />} title="Panel Central de Licencias (SuperAdmin)"
+                desc="Gestión central de clientes B2B, activación/desactivación de licencias, rubros y países."
+                action={<button className="px-3 py-1.5 rounded-[6px] bg-amber-400 text-slate-950 font-bold text-xs hover:bg-amber-300 transition" onClick={() => { onClose(); onOpenAdminPanel(); }}>Abrir Panel</button>} />
+            )}
             <Row icon={<Briefcase className="w-4 h-4" strokeWidth={1.5} />} title="Perfil de proveedor"
               desc={providerServices.length ? providerServices.map(serviceLabel).join(' · ') : 'Aún no define los servicios que ofrece. Sin perfil, el ranking es genérico.'}
               action={<button className={ghost} onClick={onOpenProviderProfile}>Editar</button>} />

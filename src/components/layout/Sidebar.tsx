@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, Plus, ShieldCheck, LayoutDashboard, Target, Pickaxe, Radio, Network, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Settings, Plus, ShieldCheck, ShieldAlert, LayoutDashboard, Target, Pickaxe, Radio, Network, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { ICSeal } from '../brand/ICSeal';
 import { RadarWordmark, ClientLogo, ClientBrand } from '../brand/ICSeal';
 
@@ -17,6 +17,8 @@ interface SidebarProps {
   sources?: string[];
   clientBrand?: ClientBrand;
   onOpenAccount?: () => void;
+  isAdmin?: boolean;
+  onOpenAdminPanel?: () => void;
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
 }
@@ -45,6 +47,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   sources = [],
   clientBrand,
   onOpenAccount,
+  isAdmin = false,
+  onOpenAdminPanel,
   collapsed = false,
   onToggleCollapsed,
 }) => {
@@ -142,11 +146,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* Configuración y fuentes */}
-      <div className={`${collapsed ? 'p-2' : 'p-4'} border-t border-slate-800 space-y-3`}>
+      <div className={`${collapsed ? 'p-2' : 'p-4'} border-t border-slate-800 space-y-2`}>
+        {isAdmin && onOpenAdminPanel && (
+          <button
+            onClick={onOpenAdminPanel}
+            title="Panel de Control Central de Clientes y Licencias (SuperAdmin)"
+            className={`w-full flex items-center ${
+              collapsed ? 'justify-center py-2.5' : 'gap-2 px-3 py-2'
+            } rounded-[6px] border border-amber-500/50 bg-gradient-to-r from-amber-500/20 to-orange-500/10 text-xs font-bold text-amber-300 hover:border-amber-400 hover:text-white transition shadow-sm shadow-amber-500/10`}
+          >
+            <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" strokeWidth={2} />
+            {!collapsed && (
+              <span className="flex-1 flex items-center justify-between text-left">
+                <span>Panel Central</span>
+                <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-amber-400 text-slate-950">
+                  ADMIN
+                </span>
+              </span>
+            )}
+          </button>
+        )}
+
         <button
           onClick={onOpenAccount}
           title="Configuración"
-          className={`w-full flex items-center ${collapsed ? 'justify-center py-3' : 'gap-2 px-3 py-2.5'} rounded-[6px] border border-slate-700 bg-slate-900 text-xs font-bold text-white hover:border-amber-400/60 transition`}
+          className={`w-full flex items-center ${collapsed ? 'justify-center py-2.5' : 'gap-2 px-3 py-2'} rounded-[6px] border border-slate-700 bg-slate-900 text-xs font-bold text-white hover:border-amber-400/60 transition`}
         >
           <Settings className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
           {!collapsed && 'Configuración'}

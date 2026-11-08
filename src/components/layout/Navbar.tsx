@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, PlusCircle, ChevronDown } from 'lucide-react';
+import { Search, PlusCircle, ChevronDown, ShieldAlert } from 'lucide-react';
 import { ICSeal, ClientBrand } from '../brand/ICSeal';
 
 interface NavbarProps {
@@ -10,6 +10,8 @@ interface NavbarProps {
   onSearchChange: (query: string) => void;
   onOpenAccount: () => void;
   onOpenSignalSimulator?: () => void; // solo administrador IC
+  isAdmin?: boolean;
+  onOpenAdminPanel?: () => void;
   userEmail?: string | null;
   clientBrand?: ClientBrand;
   projectsCount?: number;
@@ -30,6 +32,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSearchChange,
   onOpenAccount,
   onOpenSignalSimulator,
+  isAdmin = false,
+  onOpenAdminPanel,
   userEmail,
   clientBrand,
   projectsCount = 0,
@@ -80,6 +84,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
             {projectsCount} PROYECTOS{lastSignalDate ? ` · ACT. ${lastSignalDate}` : ''}
           </div>
+
+          {isAdmin && onOpenAdminPanel && (
+            <button
+              onClick={onOpenAdminPanel}
+              title="Panel de Control Central de Clientes y Licencias (SuperAdmin)"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-[11px] font-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 transition shadow-md shadow-amber-500/20"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" strokeWidth={2.5} />
+              <span className="hidden sm:inline">PANEL CENTRAL</span>
+            </button>
+          )}
 
           {onOpenSignalSimulator && (
             <button

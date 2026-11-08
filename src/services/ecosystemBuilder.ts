@@ -93,12 +93,29 @@ export function buildEcosystem(
   const all = [...companies.values()];
   for (const a of actors) {
     const aTokens = tokens(a.company);
-    const byProject = all.filter(
-      (c) => (c.supportedRoles || []).includes('Titular Minero') && (a.projectIds || []).some((pid) => (c.relatedProjectIds || []).includes(pid))
-    );
     const nameMatch = (c: MiningCompany) => tokens(c.name).some((t) => aTokens.includes(t));
-    let targets = byProject.filter(nameMatch);
-    if (!targets.length) targets = byProject.length ? byProject : all.filter(nameMatch);
+
+    // 1. Prioridad: Coincidencia por nombre de empresa (ej: Fluor Corporation -> Fluor, COMIN S.A. -> COMIN, BHP -> BHP)
+    let targets = all.filter(nameMatch);
+
+    // 2. Si no coincide directamente por nombre pero tiene proyectos asociados, buscar la empresa del proyecto
+    if (!targets.length) {
+      const projectCompanies = all.filter((c) =>
+        (a.projectIds || []).some((pid) => (c.relatedProjectIds || []).includes(pid))
+      );
+      // Si el rol indica EPCM, asociar a la empresa EPCM del proyecto
+      const isEpcm = /epcm|ingenier/i.test(a.decisionRole || '') || /epcm/i.test(a.jobTitle || '');
+      if (isEpcm) {
+        targets = projectCompanies.filter((c) => (c.supportedRoles || []).includes('EPCM'));
+      }
+      // Si no, asociar al Titular Minero del proyecto
+      if (!targets.length) {
+        targets = projectCompanies.filter((c) => (c.supportedRoles || []).includes('Titular Minero'));
+      }
+      if (!targets.length) {
+        targets = projectCompanies;
+      }
+    }
     const contact: CompanyKeyContact = {
       name: a.fullName,
       role: a.jobTitle || 'Cargo no informado',
