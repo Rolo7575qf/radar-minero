@@ -194,11 +194,12 @@ var ASSISTANT_BRIEF_FORMAT = [
   "7. Siguiente acción recomendada",
 ].join("\n");
 
-async function buildAssistantContext(env, projectId, question) {
+async function buildAssistantContext(env, projectId, question, scope) {
   const [pAll, oAll] = await env.DB.batch([
     env.DB.prepare("SELECT id, name, region, owner, epcm, commodity, stage, capex_estimated_millions_usd, last_signal_date FROM projects ORDER BY capex_estimated_millions_usd DESC"),
     env.DB.prepare("SELECT related_project_id, target_rfq_date, target_basis, priority FROM opportunities"),
   ]);
+  pAll.results = pAll.results.filter((p) => inScope(scope, p.id));
   const rfq = {};
   for (const o of oAll.results) {
     if (o.target_rfq_date && (!rfq[o.related_project_id] || o.target_rfq_date < rfq[o.related_project_id])) rfq[o.related_project_id] = o.target_rfq_date;
@@ -210,7 +211,7 @@ async function buildAssistantContext(env, projectId, question) {
   // Proyectos con detalle: el indicado + los mencionados por nombre en la pregunta (máx. 3)
   const q = assistNorm(question);
   const ids = [];
-  if (projectId) ids.push(projectId);
+  if (projectId && inScope(scope, projectId) && pAll.results.some((p) => p.id === projectId)) ids.push(projectId);
   for (const p of pAll.results) {
     if (ids.length >= 3) break;
     if (ids.includes(p.id)) continue;
@@ -268,7 +269,7 @@ async function callAssistantModel(env, system, messages) {
   return String((r && r.response) || "").trim();
 }
 
-async function handleAssistant(env, userEmail, body) {
+async function handleAssistant(env, userEmail, body, scope) {
   const mode = body.mode === "brief" ? "brief" : "chat";
   const messages = (Array.isArray(body.messages) ? body.messages : [])
     .slice(-8)
@@ -284,7 +285,7 @@ async function handleAssistant(env, userEmail, body) {
   if (used && used.n >= ASSISTANT_DAILY_LIMIT) return json({ error: "Alcanzó el límite diario de " + ASSISTANT_DAILY_LIMIT + " consultas." }, 429);
 
   const question = mode === "brief" ? "" : messages[messages.length - 1].content;
-  const ctx = await buildAssistantContext(env, projectId, question);
+  const ctx = await buildAssistantContext(env, projectId, question, scope);
   if (mode === "brief" && !ctx.details) return json({ error: "Proyecto no encontrado" }, 404);
 
   const services = (Array.isArray(body.providerServices) ? body.providerServices : []).slice(0, 12).map((s) => assistTrunc(s, 80));
@@ -311,6 +312,57 @@ async function handleAssistant(env, userEmail, body) {
 }
 
 
+// ---------------------------------------------------------------------------
+// Licencias: el servidor aplica estado, vigencia, país y rubro de cada cliente.
+// El administrador central ve todo. Sin licencia vigente no se entrega ningún dato.
+// ---------------------------------------------------------------------------
+var ADMIN_EMAIL = "roloquinonesf@gmail.com";
+var DATA_PATHS = ["/api/projects", "/api/signals", "/api/opportunities", "/api/actors", "/api/assistant"];
+
+async function resolveAccess(env, userEmail) {
+  if (env.REQUIRE_AUTH !== "1") return { all: true }; // desarrollo local sin Access
+  if (!userEmail) return { denied: "sin_sesion" };
+  const mail = userEmail.toLowerCase();
+  if (mail === ADMIN_EMAIL) return { all: true };
+  try {
+    const { results } = await env.DB.prepare("SELECT * FROM client_licenses").all();
+    const lic = (results || []).find((r) => {
+      if (String(r.contact_email || "").toLowerCase() === mail) return true;
+      return j(r.allowed_emails, []).some((e) => {
+        const x = String(e).toLowerCase();
+        return x.startsWith("@") ? mail.endsWith(x) : x === mail;
+      });
+    });
+    if (!lic) return { denied: "sin_licencia" };
+    if (lic.status !== "activa" && lic.status !== "demo") return { denied: "licencia_" + lic.status };
+    if (lic.expiry_date && String(lic.expiry_date) < new Date().toISOString().slice(0, 10)) return { denied: "licencia_vencida" };
+    return { all: false, countries: j(lic.countries, ["Chile"]), rubros: j(lic.rubros, ["Minería"]) };
+  } catch {
+    return { denied: "error_licencia" }; // ante la duda, no se entregan datos
+  }
+}
+
+// Devuelve { ids: Set|null, orphanOk } con los proyectos que la licencia permite ver.
+// Hoy todos los datos son de minería; los registros sin proyecto asociado solo se entregan
+// si la licencia incluye Minería y Chile (único país con datos cargados).
+async function allowedScope(env, access) {
+  if (access.all) return { ids: null, orphanOk: true };
+  const mining = access.rubros.includes("Minería");
+  if (!mining) return { ids: new Set(), orphanOk: false };
+  const { results } = await env.DB.prepare("SELECT id, country FROM projects").all();
+  const ok = new Set(access.countries.map((c) => String(c).toLowerCase()));
+  return {
+    ids: new Set(results.filter((r) => ok.has(String(r.country || "Chile").toLowerCase())).map((r) => r.id)),
+    orphanOk: ok.has("chile"),
+  };
+}
+var inScope = (scope, projectId) => !scope || scope.ids === null || (projectId ? scope.ids.has(projectId) : scope.orphanOk);
+var actorInScope = (scope, row) => {
+  if (!scope || scope.ids === null) return true;
+  const ids = j(row.project_ids, []);
+  return ids.length ? ids.some((id) => scope.ids.has(id)) : scope.orphanOk;
+};
+
 var worker_default = {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -330,6 +382,14 @@ var worker_default = {
       }
     }
 
+    // --- Licencia: estado, vigencia, país y rubro aplicados en el servidor ---
+    let scope = null;
+    if (DATA_PATHS.includes(url.pathname)) {
+      const access = await resolveAccess(env, userEmail);
+      if (access.denied) return json({ error: "Sin licencia vigente para esta plataforma", code: access.denied }, 403);
+      scope = await allowedScope(env, access);
+    }
+
     // --- Asistente de IA (fichas + brief comercial) ---
     if (url.pathname === "/api/assistant") {
       if (!userEmail) return json({ error: "No autorizado" }, 401);
@@ -337,7 +397,7 @@ var worker_default = {
       try {
         const raw = await request.text();
         if (raw.length > 30000) return json({ error: "Solicitud demasiado grande" }, 413);
-        return await handleAssistant(env, userEmail, JSON.parse(raw));
+        return await handleAssistant(env, userEmail, JSON.parse(raw), scope);
       } catch (err) {
         return json({ error: "No se pudo generar la respuesta. Intente nuevamente." }, 500);
       }
@@ -402,8 +462,7 @@ var worker_default = {
         }
         return json({ isSuperAdmin: false, status: "sin_licencia" });
       } catch {
-        // Si la tabla aún no se ha creado en D1, permitir acceso de cortesía
-        return json({ isSuperAdmin: false, status: "activa", countries: ["Chile"], rubros: ["Minería"] });
+        return json({ isSuperAdmin: false, status: "error_licencia" });
       }
     }
 
@@ -509,7 +568,7 @@ var worker_default = {
           (sources[r.related_project_id] ||= new Set()).add(r.original_source);
         }
         for (const r of h.results) (hist[r.project_id] ||= []).push(mapHistory(r));
-        const out = p.results.map((r) => {
+        const out = p.results.filter((r) => inScope(scope, r.id)).map((r) => {
           const c = REGION_COORDS[r.region] || [-30.0, -70.5];
           return {
             id: r.id,
@@ -549,7 +608,7 @@ var worker_default = {
     if (url.pathname === "/api/signals") {
       try {
         const { results } = await env.DB.prepare("SELECT * FROM signals ORDER BY published_date DESC").all();
-        return json(results.map(mapSignal));
+        return json(results.filter((r) => inScope(scope, r.related_project_id)).map(mapSignal));
       } catch (err) {
         return json({ error: err.message }, 500);
       }
@@ -558,7 +617,7 @@ var worker_default = {
     if (url.pathname === "/api/opportunities") {
       try {
         const { results } = await env.DB.prepare("SELECT * FROM opportunities ORDER BY detection_date DESC").all();
-        return json(results.map(mapOpportunity));
+        return json(results.filter((r) => inScope(scope, r.related_project_id)).map(mapOpportunity));
       } catch (err) {
         return json({ error: err.message }, 500);
       }
@@ -567,7 +626,7 @@ var worker_default = {
     if (url.pathname === "/api/actors") {
       try {
         const { results } = await env.DB.prepare("SELECT * FROM actors ORDER BY company, full_name").all();
-        return json(results.map(mapActor));
+        return json(results.filter((r) => actorInScope(scope, r)).map(mapActor));
       } catch (err) {
         return json({ error: err.message }, 500);
       }
