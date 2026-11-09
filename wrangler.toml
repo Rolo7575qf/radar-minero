@@ -7,6 +7,12 @@ name = "radar-minero"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
+# Rutas de producción: ambos dominios apuntan al mismo Worker
+routes = [
+  { pattern = "radar.inteligenciaconectada.com/*", zone_name = "inteligenciaconectada.com" },
+  { pattern = "tracer.inteligenciaconectada.com/*", zone_name = "inteligenciaconectada.com" }
+]
+
 # La URL pública *.workers.dev queda desactivada: el acceso es solo por el dominio protegido por Access.
 workers_dev = false
 preview_urls = false
