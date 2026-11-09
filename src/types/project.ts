@@ -1,4 +1,4 @@
-// Tipos para Proyectos Mineros según especificación RADAR MINERO
+// Tipos para Proyectos según especificación TRACER
 
 export type MiningStage =
   | '1. Exploración'

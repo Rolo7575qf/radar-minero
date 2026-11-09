@@ -251,7 +251,7 @@ export const App: React.FC = () => {
     const newDash: DashboardConfig = {
       id: `dash-${Date.now()}`,
       name: name || `Mi Dashboard Personalizado ${dashboards.length + 1}`,
-      description: description || 'Panel analítico personalizado creado en RADAR MINERO.',
+      description: description || 'Panel analítico personalizado creado en TRACER.',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       widgets: [
@@ -612,7 +612,7 @@ export const App: React.FC = () => {
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Conforme a la sección 7 del prompt maestro, RADAR MINERO evalúa cada oportunidad comercial combinando 6 variables ponderables. Los usuarios pueden adaptar las ponderaciones de acuerdo con su modelo de negocio (ej. empresas de ingeniería que buscan proyectos tempranos vs contratistas de montaje que buscan proyectos con EPCM ya adjudicado).
+                  TRACER evalúa cada oportunidad comercial combinando variables ponderables objetivas. Los usuarios pueden adaptar las ponderaciones de acuerdo con su modelo de negocio (ej. empresas de ingeniería que buscan proyectos tempranos vs contratistas de montaje que buscan proyectos con EPCM ya adjudicado).
                 </p>
 
                 <button

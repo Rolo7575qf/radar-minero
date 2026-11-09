@@ -128,7 +128,7 @@ export const dossierPdfService = {
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dossier Ejecutivo: ${escapeHtml(project.name)} | RADAR MINERO</title>
+  <title>Dossier Ejecutivo: ${escapeHtml(project.name)} | TRACER</title>
   <style>
     @page {
       size: A4 portrait;
@@ -279,7 +279,7 @@ export const dossierPdfService = {
   <!-- Header -->
   <div class="header-bar">
     <div>
-      <span class="badge-ic">RADAR MINERO · INTELIGENCIACONECTADA™</span>
+      <span class="badge-ic">TRACER · INTELIGENCIACONECTADA™</span>
       <div style="font-size: 18px; font-weight: 900; color: #0f172a; margin-top: 4px;">DOSSIER COMERCIAL DE PROYECTO</div>
       <div style="font-size: 10px; color: #64748b;">Generado el ${new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' })} para reuniones estratégicas</div>
     </div>
@@ -358,7 +358,7 @@ export const dossierPdfService = {
   <!-- Footer -->
   <div class="footer">
     <div>
-      Documento Confidencial · Preparado para <strong>${clientName}</strong> a través de <strong>RADAR MINERO</strong>
+      Documento Confidencial · Preparado para <strong>${clientName}</strong> a través de <strong>TRACER</strong>
     </div>
     <div style="text-align: right;">
       © ${new Date().getFullYear()} InteligenciaConectada™ · B2B Growth Partner en Minería e Industria
@@ -433,7 +433,7 @@ export const dossierPdfService = {
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dossier Oportunidad: ${escapeHtml(opp.title)} | RADAR MINERO</title>
+  <title>Dossier Oportunidad: ${escapeHtml(opp.title)} | TRACER</title>
   <style>
     @page { size: A4 portrait; margin: 14mm; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #0f172a; margin: 0; font-size: 12px; line-height: 1.5; }
@@ -460,7 +460,7 @@ export const dossierPdfService = {
 
   <div class="header-bar">
     <div>
-      <span class="badge-ic">RADAR MINERO · FICHA DE OPORTUNIDAD B2B</span>
+      <span class="badge-ic">TRACER · FICHA DE OPORTUNIDAD B2B</span>
       <div style="font-size: 18px; font-weight: 900; color: #0f172a; margin-top: 4px;">OPORTUNIDAD COMERCIAL CALIFICADA</div>
       <div style="font-size: 10px; color: #64748b;">Generado el ${new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
     </div>
@@ -533,7 +533,7 @@ export const dossierPdfService = {
   ` : ''}
 
   <div class="footer">
-    <div>Preparado para <strong>${clientName}</strong> · RADAR MINERO</div>
+    <div>Preparado para <strong>${clientName}</strong> · TRACER</div>
     <div>InteligenciaConectada™ · B2B Growth Partner</div>
   </div>
 </body>

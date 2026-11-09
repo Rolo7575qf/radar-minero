@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="lg:hidden"><ICSeal size={30} /></div>
           <div className="min-w-0">
             <div className="ic-mono text-[10px] text-slate-500 truncate">
-              RADAR MINERO <span className="text-slate-700">/</span> {sectionTitle.toUpperCase()}
+              TRACER <span className="text-slate-700">/</span> {sectionTitle.toUpperCase()}
             </div>
             <h1 className="ic-display text-white text-lg sm:text-xl truncate">
               {sectionTitle}

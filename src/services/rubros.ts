@@ -1,7 +1,7 @@
 import { MiningProject } from '../types/project';
 
 /**
- * Rubros de proveedor de Radar Minero ("Para mi rubro").
+ * Rubros de proveedor de TRACER ("Para mi rubro").
  * Las etiquetas por proyecto son HIPÓTESIS inferidas de etapa, tipo y texto público;
  * no son hechos declarados por el titular.
  */

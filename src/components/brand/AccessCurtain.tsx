@@ -42,7 +42,7 @@ export const AccessCurtain: React.FC<Props> = ({ ready, email, clientBrand, stat
     <div
       className={`fixed inset-0 z-[100] bg-slate-950 text-white overflow-y-auto ${leaving ? 'ic-curtain-out' : ''}`}
       role="dialog"
-      aria-label="Acceso a Radar Minero"
+      aria-label="Acceso a TRACER"
     >
       <div className="min-h-full grid lg:grid-cols-[1.15fr_1fr]">
         {/* Lado marca */}
@@ -70,7 +70,7 @@ export const AccessCurtain: React.FC<Props> = ({ ready, email, clientBrand, stat
                 <div className="ic-mono text-[11px] font-bold tracking-[0.18em]">INTELIGENCIACONECTADA™</div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="ic-rule" />
-                  <span className="ic-eyebrow text-[10px] text-amber-400">Radar Minero · Inteligencia de proyectos</span>
+                  <span className="ic-eyebrow text-[10px] text-amber-400">TRACER · Trazabilidad de Inversiones Industriales</span>
                 </div>
               </div>
             </div>
@@ -153,7 +153,7 @@ export const AccessCurtain: React.FC<Props> = ({ ready, email, clientBrand, stat
                 ready ? 'bg-amber-400 hover:bg-amber-300 text-slate-950' : 'bg-slate-900 text-slate-500 cursor-wait'
               }`}
             >
-              {ready ? (<>INGRESAR AL RADAR <ArrowRight className="w-4 h-4" /></>) : 'SINCRONIZANDO DATOS…'}
+              {ready ? (<>INGRESAR A TRACER <ArrowRight className="w-4 h-4" /></>) : 'SINCRONIZANDO DATOS…'}
             </button>
 
             <p className="mt-5 flex items-start gap-2 text-[11px] text-slate-500 leading-relaxed">
@@ -173,7 +173,7 @@ export const AccessCurtain: React.FC<Props> = ({ ready, email, clientBrand, stat
             ready ? 'bg-amber-400 text-slate-950' : 'bg-slate-900 text-slate-500'
           }`}
         >
-          {ready ? (<>INGRESAR AL RADAR <ArrowRight className="w-4 h-4" /></>) : 'SINCRONIZANDO DATOS…'}
+          {ready ? (<>INGRESAR A TRACER <ArrowRight className="w-4 h-4" /></>) : 'SINCRONIZANDO DATOS…'}
         </button>
       </div>
     </div>

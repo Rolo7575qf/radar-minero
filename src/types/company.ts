@@ -1,4 +1,4 @@
-// Inteligencia del Ecosistema Empresarial - RADAR MINERO
+// Inteligencia del Ecosistema Empresarial - TRACER
 
 export type CompanyRole =
   | 'Titular Minero'

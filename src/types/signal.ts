@@ -1,4 +1,4 @@
-// Motor de Detección de Señales - RADAR MINERO
+// Motor de Detección de Señales - TRACER
 
 export type SignalCategory =
   | 'Ambiental'

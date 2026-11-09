@@ -1,5 +1,6 @@
 # ==============================================================================
-# RADAR MINERO — CONFIGURACIÓN DE CLOUDFLARE WORKER & STATIC ASSETS
+# TRACER — CONFIGURACIÓN DE CLOUDFLARE WORKER & STATIC ASSETS
+# InteligenciaConectada™ · B2B Industrial Intelligence Platform
 # ==============================================================================
 
 name = "radar-minero"

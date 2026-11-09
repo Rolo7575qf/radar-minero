@@ -1,4 +1,4 @@
-// Motor de Oportunidades Comerciales B2B - RADAR MINERO
+// Motor de Oportunidades Comerciales B2B - TRACER
 
 export type OpportunityPriority = 'Máxima' | 'Alta' | 'Media' | 'Baja-media';
 
