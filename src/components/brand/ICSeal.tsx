@@ -17,13 +17,7 @@ export const ICSeal: React.FC<{ size?: number; className?: string }> = ({ size =
 export const TracerWordmark: React.FC<{ compact?: boolean }> = ({ compact = false }) => (
   <div className="flex items-center gap-3 min-w-0">
     <ICSeal size={compact ? 30 : 36} />
-    <div className="min-w-0">
-      <div className="ic-mono text-[9px] font-bold tracking-[0.08em] text-white whitespace-nowrap">INTELIGENCIACONECTADA™</div>
-      <div className="flex items-center gap-2 mt-1">
-        <span className="ic-rule" style={{ width: 18 }} />
-        <span className="ic-eyebrow text-[9px] text-amber-400 truncate tracking-wider font-extrabold">TRACER · Industrial Intelligence</span>
-      </div>
-    </div>
+    <span className="ic-display text-white font-extrabold tracking-widest text-base whitespace-nowrap">TRACER</span>
   </div>
 );
 
