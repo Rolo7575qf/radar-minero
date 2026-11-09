@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { isAdminEmailAddr } from './services/adminEmails';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar, ActiveTab, MobileNav, SECTION_TITLES } from './components/layout/Sidebar';
 import { AccessCurtain } from './components/brand/AccessCurtain';
+import { LoginScreen } from './components/brand/LoginScreen';
 import { LicenseGate } from './components/brand/LicenseGate';
 import { AccountModal } from './components/account/AccountModal';
 import { ClientBrand, ClientLogo } from './components/brand/ICSeal';
@@ -127,11 +129,12 @@ export const App: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [dataReady, setDataReady] = useState(false);
   const [accessDenied, setAccessDenied] = useState<string | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
   const [showCurtain, setShowCurtain] = useState<boolean>(() => {
     try { return sessionStorage.getItem('radar_curtain_seen') !== '1'; } catch { return true; }
   });
   const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-  const isAdmin = userEmail === 'roloquinonesf@gmail.com' || isLocalDev;
+  const isAdmin = isAdminEmailAddr(userEmail) || isLocalDev;
   const [navCollapsed, setNavCollapsed] = useState<boolean>(() => {
     try { return localStorage.getItem('radar_nav_collapsed') === '1'; } catch { return false; }
   });
@@ -164,7 +167,7 @@ export const App: React.FC = () => {
 
     // Licencia: el servidor ya no entrega datos sin licencia vigente; aquí se muestra el motivo.
     fetch('/api/access')
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => { if (r.status === 401) { setNeedsLogin(true); return null; } return r.ok ? r.json() : null; })
       .then((a) => { if (a && a.allowed === false) setAccessDenied(a.code || 'sin_licencia'); })
       .catch(() => { /* sin API (desarrollo local): se continúa */ });
 
@@ -416,6 +419,7 @@ export const App: React.FC = () => {
   const currentDashboard =
     dashboards.find((d) => d.id === activeDashboardId) || dashboards[0];
 
+  if (needsLogin) return <LoginScreen />;
   if (accessDenied) return <LicenseGate code={accessDenied} email={userEmail} />;
 
   return (

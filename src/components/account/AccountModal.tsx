@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { isAdminEmailAddr } from '../../services/adminEmails';
 import { X, Upload, Trash2, Briefcase, Sliders, RotateCcw, Image as ImageIcon, BookOpen, ShieldAlert } from 'lucide-react';
 import { ClientBrand } from '../brand/ICSeal';
 import { serviceLabel } from '../../data/serviceCatalog';
@@ -126,7 +127,7 @@ export const AccountModal: React.FC<Props> = ({
           </div>
 
           <div className="mt-6">
-            {(isAdmin || email === 'roloquinonesf@gmail.com') && onOpenAdminPanel && (
+            {(isAdmin || isAdminEmailAddr(email)) && onOpenAdminPanel && (
               <Row icon={<ShieldAlert className="w-4 h-4 text-amber-400" strokeWidth={1.5} />} title="Panel Central de Licencias (SuperAdmin)"
                 desc="Gestión central de clientes B2B, activación/desactivación de licencias, rubros y países."
                 action={<button className="px-3 py-1.5 rounded-[6px] bg-amber-400 text-slate-950 font-bold text-xs hover:bg-amber-300 transition" onClick={() => { onClose(); onOpenAdminPanel(); }}>Abrir Panel</button>} />

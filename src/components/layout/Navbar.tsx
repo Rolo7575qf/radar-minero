@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, PlusCircle, ChevronDown, ShieldAlert } from 'lucide-react';
+import { Search, PlusCircle, ChevronDown, ShieldAlert, LogOut } from 'lucide-react';
 import { ICSeal, ClientBrand } from '../brand/ICSeal';
 
 interface NavbarProps {
@@ -125,6 +125,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="block ic-mono text-[9px] text-slate-500 truncate">{userEmail || 'Sesión verificada'}</span>
             </span>
             <ChevronDown className="w-3.5 h-3.5 text-slate-500" strokeWidth={1.5} />
+          </button>
+          <button
+            onClick={async () => {
+              try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch { /* sin red */ }
+              window.location.href = '/';
+            }}
+            className="p-2 rounded-[6px] border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition"
+            title="Cerrar sesión"
+            aria-label="Cerrar sesión"
+          >
+            <LogOut className="w-4 h-4" strokeWidth={1.5} />
           </button>
         </div>
       </div>

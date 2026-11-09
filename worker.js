@@ -316,23 +316,28 @@ async function handleAssistant(env, userEmail, body, scope) {
 // Licencias: el servidor aplica estado, vigencia, país y rubro de cada cliente.
 // El administrador central ve todo. Sin licencia vigente no se entrega ningún dato.
 // ---------------------------------------------------------------------------
-var ADMIN_EMAIL = "roloquinonesf@gmail.com";
+var ADMIN_EMAILS = ["roloquinonesf@gmail.com", "rquinones@inteligenciaconectada.com"];
+var isAdminEmail = (e) => !!e && ADMIN_EMAILS.includes(String(e).toLowerCase());
 var DATA_PATHS = ["/api/projects", "/api/signals", "/api/opportunities", "/api/actors", "/api/assistant"];
 
+async function findLicense(env, mail) {
+  const { results } = await env.DB.prepare("SELECT * FROM client_licenses").all();
+  return (results || []).find((r) => {
+    if (String(r.contact_email || "").toLowerCase() === mail) return true;
+    return j(r.allowed_emails, []).some((e) => {
+      const x = String(e).toLowerCase().trim();
+      return x.startsWith("@") ? mail.endsWith(x) : x === mail;
+    });
+  }) || null;
+}
+
 async function resolveAccess(env, userEmail) {
-  if (env.REQUIRE_AUTH !== "1") return { all: true }; // desarrollo local sin Access
+  if (env.REQUIRE_AUTH !== "1") return { all: true }; // desarrollo local sin autenticación
   if (!userEmail) return { denied: "sin_sesion" };
   const mail = userEmail.toLowerCase();
-  if (mail === ADMIN_EMAIL) return { all: true };
+  if (isAdminEmail(mail)) return { all: true };
   try {
-    const { results } = await env.DB.prepare("SELECT * FROM client_licenses").all();
-    const lic = (results || []).find((r) => {
-      if (String(r.contact_email || "").toLowerCase() === mail) return true;
-      return j(r.allowed_emails, []).some((e) => {
-        const x = String(e).toLowerCase();
-        return x.startsWith("@") ? mail.endsWith(x) : x === mail;
-      });
-    });
+    const lic = await findLicense(env, mail);
     if (!lic) return { denied: "sin_licencia" };
     if (lic.status !== "activa" && lic.status !== "demo") return { denied: "licencia_" + lic.status };
     if (lic.expiry_date && String(lic.expiry_date) < new Date().toISOString().slice(0, 10)) return { denied: "licencia_vencida" };
@@ -363,6 +368,185 @@ var actorInScope = (scope, row) => {
   return ids.length ? ids.some((id) => scope.ids.has(id)) : scope.orphanOk;
 };
 
+// ---------------------------------------------------------------------------
+// Autenticación propia: código de 6 dígitos por correo + sesión firmada (cookie HttpOnly).
+// Requiere el secreto SESSION_SECRET (y RESEND_API_KEY para enviar el código; remitente MAIL_FROM).
+// Convive con Cloudflare Access: si llega el JWT de Access, también se acepta.
+// ---------------------------------------------------------------------------
+var SESSION_COOKIE = "tracer_session";
+var SESSION_TTL_S = 7 * 24 * 3600;
+var CODE_TTL_MS = 10 * 60 * 1000;
+var AUTH_MAX_ATTEMPTS = 5;
+var AUTH_REQ_PER_EMAIL_HOUR = 5;
+var AUTH_REQ_PER_IP_HOUR = 20;
+var AUTH_FAIL_PER_IP_HOUR = 30;
+var authEnc = new TextEncoder();
+var bytesToB64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+async function hmacKey(secret) {
+  return crypto.subtle.importKey("raw", authEnc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+}
+async function sha256Hex(text) {
+  const d = await crypto.subtle.digest("SHA-256", authEnc.encode(text));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+function readCookie(request, name) {
+  const c = request.headers.get("Cookie") || "";
+  for (const part of c.split(";")) {
+    const i = part.indexOf("=");
+    if (i > 0 && part.slice(0, i).trim() === name) return part.slice(i + 1).trim();
+  }
+  return null;
+}
+async function makeSessionCookie(env, email) {
+  const payload = bytesToB64url(authEnc.encode(JSON.stringify({ e: email, exp: Math.floor(Date.now() / 1000) + SESSION_TTL_S })));
+  const sig = await crypto.subtle.sign("HMAC", await hmacKey(env.SESSION_SECRET), authEnc.encode(payload));
+  return SESSION_COOKIE + "=" + payload + "." + bytesToB64url(sig) + "; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=" + SESSION_TTL_S;
+}
+var clearSessionCookie = () => SESSION_COOKIE + "=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
+async function sessionUser(request, env) {
+  try {
+    if (!env.SESSION_SECRET) return null;
+    const raw = readCookie(request, SESSION_COOKIE);
+    if (!raw) return null;
+    const [p, sig] = raw.split(".");
+    if (!p || !sig) return null;
+    const ok = await crypto.subtle.verify("HMAC", await hmacKey(env.SESSION_SECRET), b64urlToBytes(sig), authEnc.encode(p));
+    if (!ok) return null;
+    const payload = JSON.parse(new TextDecoder().decode(b64urlToBytes(p)));
+    if (!payload.exp || payload.exp * 1000 < Date.now() || !payload.e) return null;
+    return String(payload.e).toLowerCase();
+  } catch {
+    return null;
+  }
+}
+async function authCount(env, col, val, event, sinceMs) {
+  if (!val) return 0;
+  const r = await env.DB.prepare("SELECT COUNT(*) n FROM auth_log WHERE " + col + " = ? AND event = ? AND ts > ?").bind(val, event, Date.now() - sinceMs).first();
+  return (r && r.n) || 0;
+}
+async function authLog(env, email, ip, event) {
+  try {
+    await env.DB.prepare("INSERT INTO auth_log (ts, email, ip, event) VALUES (?, ?, ?, ?)").bind(Date.now(), email, ip, event).run();
+  } catch {}
+}
+async function sendLoginCode(env, email, code) {
+  if (!env.RESEND_API_KEY) throw new Error("sin_proveedor_correo");
+  const html =
+    '<div style="font-family:Arial,sans-serif;max-width:420px;margin:auto;padding:24px;color:#0f172a">' +
+    '<p style="font-size:11px;letter-spacing:2px;color:#b45309;font-weight:bold">TRACER · INDUSTRIAL INTELLIGENCE PLATFORM</p>' +
+    '<p>Su código de acceso es:</p>' +
+    '<p style="font-size:32px;letter-spacing:8px;font-weight:bold;margin:12px 0">' + code + "</p>" +
+    '<p style="font-size:13px;color:#475569">Vence en 10 minutos. Si usted no lo solicitó, ignore este correo.</p>' +
+    '<p style="font-size:12px;color:#94a3b8">InteligenciaConectada™ · Growth Partner B2B</p></div>';
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "content-type": "application/json" },
+    body: JSON.stringify({
+      from: env.MAIL_FROM || "TRACER <acceso@inteligenciaconectada.com>",
+      to: [email],
+      reply_to: env.MAIL_REPLY_TO || "rquinones@inteligenciaconectada.com",
+      subject: "Su código de acceso a TRACER: " + code,
+      html,
+      text: "Su código de acceso a TRACER es " + code + ". Vence en 10 minutos.",
+    }),
+  });
+  if (!r.ok) throw new Error("resend_" + r.status);
+}
+
+async function handleAuth(request, env, url) {
+  if (!env.SESSION_SECRET) return json({ error: "El acceso aún no está configurado en el servidor." }, 503);
+  const ip = request.headers.get("CF-Connecting-IP") || "";
+  const path = url.pathname;
+
+  if (path === "/api/auth/logout" && request.method === "POST") {
+    return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json", "Set-Cookie": clearSessionCookie() } });
+  }
+  if (request.method !== "POST") return json({ error: "Método no permitido" }, 405);
+  let body = {};
+  try { body = await request.json(); } catch {}
+  const email = String(body.email || "").trim().toLowerCase();
+  if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/.test(email) || email.length > 254) return json({ error: "Correo no válido" }, 400);
+
+  if (path === "/api/auth/request") {
+    if ((await authCount(env, "email", email, "request", 3600_000)) >= AUTH_REQ_PER_EMAIL_HOUR ||
+        (await authCount(env, "ip", ip, "request", 3600_000)) >= AUTH_REQ_PER_IP_HOUR) {
+      return json({ error: "Demasiados intentos. Espere un momento e intente nuevamente." }, 429);
+    }
+    await authLog(env, email, ip, "request");
+    let eligible = isAdminEmail(email);
+    if (!eligible) {
+      try { eligible = !!(await findLicense(env, email)); } catch { eligible = false; }
+    }
+    // Respuesta idéntica exista o no la licencia: no se revela qué correos son clientes.
+    if (!eligible) {
+      await authLog(env, email, ip, "sin_licencia");
+      return json({ ok: true });
+    }
+    const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, "0");
+    const hash = await sha256Hex(email + ":" + code + ":" + env.SESSION_SECRET);
+    await env.DB.prepare(
+      "INSERT INTO auth_codes (email, code_hash, expires_at, attempts, created_at) VALUES (?, ?, ?, 0, ?) ON CONFLICT(email) DO UPDATE SET code_hash = excluded.code_hash, expires_at = excluded.expires_at, attempts = 0, created_at = excluded.created_at"
+    ).bind(email, hash, Date.now() + CODE_TTL_MS, Date.now()).run();
+    try {
+      await sendLoginCode(env, email, code);
+    } catch (e) {
+      await authLog(env, email, ip, "envio_fallido");
+      return json({ error: "No pudimos enviar el código. Intente nuevamente en unos minutos." }, 502);
+    }
+    return json({ ok: true });
+  }
+
+  if (path === "/api/auth/verify") {
+    if ((await authCount(env, "ip", ip, "verify_fail", 3600_000)) >= AUTH_FAIL_PER_IP_HOUR) {
+      return json({ error: "Demasiados intentos. Espere un momento e intente nuevamente." }, 429);
+    }
+    const code = String(body.code || "").replace(/\D/g, "");
+    const row = await env.DB.prepare("SELECT * FROM auth_codes WHERE email = ?").bind(email).first();
+    const bad = async () => {
+      await authLog(env, email, ip, "verify_fail");
+      return json({ error: "Código inválido o vencido" }, 400);
+    };
+    if (code.length !== 6 || !row || row.expires_at < Date.now()) return bad();
+    if (row.attempts >= AUTH_MAX_ATTEMPTS) {
+      await env.DB.prepare("DELETE FROM auth_codes WHERE email = ?").bind(email).run();
+      return json({ error: "Demasiados intentos. Solicite un código nuevo." }, 429);
+    }
+    const hash = await sha256Hex(email + ":" + code + ":" + env.SESSION_SECRET);
+    if (hash !== row.code_hash) {
+      await env.DB.prepare("UPDATE auth_codes SET attempts = attempts + 1 WHERE email = ?").bind(email).run();
+      return bad();
+    }
+    await env.DB.prepare("DELETE FROM auth_codes WHERE email = ?").bind(email).run(); // un solo uso
+
+    // Límite de usuarios por licencia (el administrador no cuenta)
+    if (!isAdminEmail(email)) {
+      try {
+        const lic = await findLicense(env, email);
+        if (lic) {
+          const known = await env.DB.prepare("SELECT 1 x FROM license_users WHERE license_id = ? AND email = ?").bind(lic.id, email).first();
+          if (!known) {
+            const c = await env.DB.prepare("SELECT COUNT(*) n FROM license_users WHERE license_id = ?").bind(lic.id).first();
+            if (((c && c.n) || 0) >= (lic.max_users || 5)) {
+              await authLog(env, email, ip, "limite_usuarios");
+              return json({ error: "Su empresa alcanzó el máximo de usuarios de la licencia. Contacte a su ejecutivo de InteligenciaConectada™.", code: "limite_usuarios" }, 403);
+            }
+          }
+          await env.DB.prepare(
+            "INSERT INTO license_users (license_id, email) VALUES (?, ?) ON CONFLICT(license_id, email) DO UPDATE SET last_seen = CURRENT_TIMESTAMP"
+          ).bind(lic.id, email).run();
+        }
+      } catch {
+        return json({ error: "No pudimos verificar su licencia. Intente nuevamente." }, 503);
+      }
+    }
+    await authLog(env, email, ip, "login");
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { "Content-Type": "application/json", "Set-Cookie": await makeSessionCookie(env, email) },
+    });
+  }
+  return json({ error: "No encontrado" }, 404);
+}
+
 var worker_default = {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -373,10 +557,13 @@ var worker_default = {
       return json({ ok: true, auth: env.REQUIRE_AUTH === "1" });
     }
 
+    // --- Login propio (público: ahí se obtiene la sesión) ---
+    if (url.pathname.startsWith("/api/auth/")) return handleAuth(request, env, url);
+
     // --- Control de acceso a toda la API ---
     let userEmail = null;
     if (url.pathname.startsWith("/api/")) {
-      userEmail = await verifiedUser(request, env);
+      userEmail = (await verifiedUser(request, env)) || (await sessionUser(request, env));
       if (env.REQUIRE_AUTH === "1" && !userEmail) {
         return json({ error: "No autorizado" }, 401);
       }
@@ -435,7 +622,7 @@ var worker_default = {
     // --- Verificación de licencia del usuario autenticado ---
     if (url.pathname === "/api/license/me") {
       if (!userEmail) return json({ isSuperAdmin: false, status: "sin_sesion" });
-      if (userEmail === "roloquinonesf@gmail.com") {
+      if (isAdminEmail(userEmail)) {
         return json({
           isSuperAdmin: true,
           status: "activa",
@@ -472,9 +659,19 @@ var worker_default = {
       }
     }
 
+    // --- Uso por licencia: usuarios activos y últimos ingresos (solo administrador) ---
+    if (url.pathname === "/api/admin/usage" && request.method === "GET") {
+      if (!isAdminEmail(userEmail)) return json({ error: "Acceso denegado" }, 403);
+      const users = await env.DB.prepare(
+        "SELECT l.id licenseId, l.company_name companyName, l.max_users maxUsers, l.status status, l.expiry_date expiryDate, u.email, u.first_seen firstSeen, u.last_seen lastSeen FROM client_licenses l LEFT JOIN license_users u ON u.license_id = l.id ORDER BY l.company_name, u.last_seen DESC"
+      ).all();
+      const events = await env.DB.prepare("SELECT ts, email, event FROM auth_log WHERE event IN ('login','limite_usuarios','sin_licencia','verify_fail') ORDER BY ts DESC LIMIT 100").all();
+      return json({ users: users.results || [], events: events.results || [] });
+    }
+
     // --- Panel de Control del Administrador Central (Exclusivo roloquinonesf@gmail.com) ---
     if (url.pathname === "/api/admin/licenses" || url.pathname.startsWith("/api/admin/licenses/")) {
-      if (userEmail !== "roloquinonesf@gmail.com") {
+      if (!isAdminEmail(userEmail)) {
         return json({ error: "Acceso denegado: panel exclusivo para Administrador Central IC" }, 403);
       }
       try {

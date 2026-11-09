@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { LicenseUsagePanel } from './LicenseUsagePanel';
 import {
   X,
   ShieldAlert,
@@ -47,7 +48,7 @@ export const AdminControlPanelModal: React.FC<AdminControlPanelModalProps> = ({
   adminEmail,
 }) => {
   const [licenses, setLicenses] = useState<ClientLicense[]>([]);
-  const [activeTab, setActiveTab] = useState<'licenses' | 'rubros' | 'countries'>('licenses');
+  const [activeTab, setActiveTab] = useState<'licenses' | 'usage' | 'rubros' | 'countries'>('licenses');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('todas');
   const [isLoading, setIsLoading] = useState(true);
@@ -353,6 +354,18 @@ export const AdminControlPanelModal: React.FC<AdminControlPanelModalProps> = ({
             </button>
 
             <button
+              onClick={() => setActiveTab('usage')}
+              className={`px-4 py-2 text-xs font-bold transition border-b-2 flex items-center gap-2 ${
+                activeTab === 'usage'
+                  ? 'border-amber-400 text-amber-400'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Uso & Accesos</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('rubros')}
               className={`px-4 py-2 text-xs font-bold transition border-b-2 flex items-center gap-2 ${
                 activeTab === 'rubros'
@@ -614,6 +627,9 @@ export const AdminControlPanelModal: React.FC<AdminControlPanelModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* TAB: USO Y ACCESOS */}
+          {activeTab === 'usage' && <LicenseUsagePanel />}
 
           {/* TAB 2: CATÁLOGO DE RUBROS INDUSTRIALES */}
           {activeTab === 'rubros' && (

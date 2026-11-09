@@ -60,12 +60,15 @@ export const LicenseGate: React.FC<Props> = ({ code, email }) => {
               <RefreshCw size={13} /> Reintentar
             </button>
           )}
-          <a
-            href="/cdn-cgi/access/logout"
+          <button
+            onClick={async () => {
+              try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch { /* sin red */ }
+              window.location.href = '/';
+            }}
             className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
           >
             <LogOut size={13} /> Ingresar con otra cuenta
-          </a>
+          </button>
         </div>
       </div>
     </div>

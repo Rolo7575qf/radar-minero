@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS auth_codes (email TEXT PRIMARY KEY, code_hash TEXT NOT NULL, expires_at INTEGER NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS auth_log (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER NOT NULL, email TEXT, ip TEXT, event TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_auth_log_email_ts ON auth_log(email, ts);
+CREATE INDEX IF NOT EXISTS idx_auth_log_ip_ts ON auth_log(ip, ts);
+CREATE TABLE IF NOT EXISTS license_users (license_id TEXT NOT NULL, email TEXT NOT NULL, first_seen TEXT DEFAULT CURRENT_TIMESTAMP, last_seen TEXT DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (license_id, email));
