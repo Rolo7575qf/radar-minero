@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar, ActiveTab, MobileNav, SECTION_TITLES } from './components/layout/Sidebar';
 import { AccessCurtain } from './components/brand/AccessCurtain';
+import { LicenseGate } from './components/brand/LicenseGate';
 import { AccountModal } from './components/account/AccountModal';
 import { ClientBrand, ClientLogo } from './components/brand/ICSeal';
 import { ArrowRight, Briefcase } from 'lucide-react';
@@ -125,6 +126,7 @@ export const App: React.FC = () => {
   const [clientBrand, setClientBrand] = useState<ClientBrand>({});
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [dataReady, setDataReady] = useState(false);
+  const [accessDenied, setAccessDenied] = useState<string | null>(null);
   const [showCurtain, setShowCurtain] = useState<boolean>(() => {
     try { return sessionStorage.getItem('radar_curtain_seen') !== '1'; } catch { return true; }
   });
@@ -159,6 +161,12 @@ export const App: React.FC = () => {
     setDashboards(storageService.getDashboards());
     setActiveDashboardId(storageService.getActiveDashboardId());
     setScoringWeights(storageService.getScoringWeights());
+
+    // Licencia: el servidor ya no entrega datos sin licencia vigente; aquí se muestra el motivo.
+    fetch('/api/access')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((a) => { if (a && a.allowed === false) setAccessDenied(a.code || 'sin_licencia'); })
+      .catch(() => { /* sin API (desarrollo local): se continúa */ });
 
     // Sincronización en segundo plano con Cloudflare D1 (si está desplegado en Cloudflare)
     (async () => {
@@ -407,6 +415,8 @@ export const App: React.FC = () => {
 
   const currentDashboard =
     dashboards.find((d) => d.id === activeDashboardId) || dashboards[0];
+
+  if (accessDenied) return <LicenseGate code={accessDenied} email={userEmail} />;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-300 flex font-sans">

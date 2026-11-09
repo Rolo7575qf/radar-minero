@@ -382,6 +382,12 @@ var worker_default = {
       }
     }
 
+    // --- Estado de acceso del usuario (alimenta la pantalla de licencia) ---
+    if (url.pathname === "/api/access") {
+      const access = await resolveAccess(env, userEmail);
+      return json({ allowed: !access.denied, code: access.denied || null });
+    }
+
     // --- Licencia: estado, vigencia, país y rubro aplicados en el servidor ---
     let scope = null;
     if (DATA_PATHS.includes(url.pathname)) {
